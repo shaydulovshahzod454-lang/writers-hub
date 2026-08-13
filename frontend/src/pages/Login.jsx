@@ -15,8 +15,12 @@ function Login() {
       await login(username, password);
       navigate('/dashboard');
     } catch (err) {
-      setError('Login yoki parol noto\'g\'ri');
+      if (err.response && err.response.status === 401) {
+        setError('Login yoki parol noto\'g\'ri');
+    } else {
+        setError('Serverga ulanishda xatolik. Backend ishlab turganini tekshiring.');
     }
+  }
   }
 
   return (

@@ -26,7 +26,10 @@ class ProjectMemberViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        queryset = ProjectMember.objects.filter(project__owner=self.request.user)
+        user = self.request.user
+        queryset = ProjectMember.objects.filter(
+            Q(project__owner=user) | Q(project__members__user=user)
+        ).distinct()
         project_id = self.request.query_params.get('project')
         if project_id:
             queryset = queryset.filter(project_id=project_id)
