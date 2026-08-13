@@ -25,9 +25,13 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Comment.objects.filter(
+        queryset = Comment.objects.filter(
             Q(chapter__project__owner=user) | Q(chapter__project__members__user=user)
         ).distinct()
+        chapter_id = self.request.query_params.get('chapter')
+        if chapter_id:
+            queryset = queryset.filter(chapter_id=chapter_id)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
