@@ -10,9 +10,13 @@ class ChapterViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Chapter.objects.filter(
+        queryset = Chapter.objects.filter(
             Q(project__owner=user) | Q(project__members__user=user)
         ).distinct()
+        project_id = self.request.query_params.get('project')
+        if project_id:
+            queryset = queryset.filter(project_id=project_id)
+        return queryset
 
 
 class CommentViewSet(viewsets.ModelViewSet):

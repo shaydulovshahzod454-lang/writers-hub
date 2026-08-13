@@ -10,6 +10,10 @@ class CharacterViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Character.objects.filter(
+        queryset = Character.objects.filter(
             Q(project__owner=user) | Q(project__members__user=user)
         ).distinct()
+        project_id = self.request.query_params.get('project')
+        if project_id:
+            queryset = queryset.filter(project_id=project_id)
+        return queryset

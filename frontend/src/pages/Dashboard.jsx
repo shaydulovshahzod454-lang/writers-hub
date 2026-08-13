@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getProjects, createProject } from '../api/projects';
 import { logout } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 function Dashboard() {
   const [projects, setProjects] = useState([]);
@@ -56,7 +57,9 @@ function Dashboard() {
 
       <ul>
         {projects.map((p) => (
-          <li key={p.id}>{p.title} ({p.genre || 'janr yo\'q'})</li>
+            <li key={p.id}>
+                <Link to={`/projects/${p.id}`}>{p.title}</Link> ({p.genre || 'janr yo\'q'})
+            </li>
         ))}
       </ul>
     </div>
