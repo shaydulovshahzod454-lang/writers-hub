@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getCharacters, createCharacter } from '../api/characters';
 import { getChapters, createChapter } from '../api/chapters';
 import { getMembers, inviteMember } from '../api/projects';
+import { getEvidence, createEvidence } from '../api/evidence';
 
 function ProjectDetail() {
   const { id } = useParams();
@@ -13,21 +14,29 @@ function ProjectDetail() {
   const [members, setMembers] = useState([]);
   const [inviteUsername, setInviteUsername] = useState('');
   const [inviteError, setInviteError] = useState('');
+  const [evidenceList, setEvidenceList] = useState([]);
+const [evidenceName, setEvidenceName] = useState('');
+const [evidenceDescription, setEvidenceDescription] = useState('');
+const [evidenceLocation, setEvidenceLocation] = useState('');
+const [evidenceIsReal, setEvidenceIsReal] = useState(true);
+const [evidenceCharacters, setEvidenceCharacters] = useState([]);
 
   useEffect(() => {
     loadData();
   }, [id]);
 
   async function loadData() {
-    const [charsData, chaptersData, membersData] = await Promise.all([
-      getCharacters(id),
-      getChapters(id),
-      getMembers(id),
-    ]);
-    setCharacters(charsData);
-    setChapters(chaptersData);
-    setMembers(membersData);
-  }
+  const [charsData, chaptersData, membersData, evidenceData] = await Promise.all([
+    getCharacters(id),
+    getChapters(id),
+    getMembers(id),
+    getEvidence(id),
+  ]);
+  setCharacters(charsData);
+  setChapters(chaptersData);
+  setMembers(membersData);
+  setEvidenceList(evidenceData);
+}
 
   async function handleAddCharacter(e) {
     e.preventDefault();
@@ -57,6 +66,33 @@ function ProjectDetail() {
       setInviteError('User topilmadi yoki xatolik yuz berdi');
     }
   }
+
+  async function handleAddEvidence(e) {
+  e.preventDefault();
+  if (!evidenceName.trim()) return;
+  await createEvidence({
+    project: id,
+    name: evidenceName,
+    description: evidenceDescription,
+    found_location: evidenceLocation,
+    is_real: evidenceIsReal,
+    related_characters: evidenceCharacters,
+  });
+  setEvidenceName('');
+  setEvidenceDescription('');
+  setEvidenceLocation('');
+  setEvidenceIsReal(true);
+  setEvidenceCharacters([]);
+  loadData();
+}
+
+function handleCharacterCheckbox(charId) {
+  setEvidenceCharacters((prev) =>
+    prev.includes(charId)
+      ? prev.filter((c) => c !== charId)
+      : [...prev, charId]
+  );
+}
 
   return (
     <div>
@@ -115,6 +151,69 @@ function ProjectDetail() {
   <ul>
     {members.map((m) => (
       <li key={m.id}>{m.user}</li>
+    ))}
+  </ul>
+</section>
+
+<section>
+  <h3>Dalillar</h3>
+  <form onSubmit={handleAddEvidence}>
+    <div>
+      <input
+        type="text"
+        placeholder="Dalil nomi"
+        value={evidenceName}
+        onChange={(e) => setEvidenceName(e.target.value)}
+      />
+    </div>
+    <div>
+      <textarea
+        placeholder="Tavsifi"
+        value={evidenceDescription}
+        onChange={(e) => setEvidenceDescription(e.target.value)}
+      />
+    </div>
+    <div>
+      <input
+        type="text"
+        placeholder="Qayerdan topildi"
+        value={evidenceLocation}
+        onChange={(e) => setEvidenceLocation(e.target.value)}
+      />
+    </div>
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={evidenceIsReal}
+          onChange={(e) => setEvidenceIsReal(e.target.checked)}
+        />
+        Haqiqiy dalil (belgisiz qoldirilsa — soxta)
+      </label>
+    </div>
+    <div>
+      <p>Qaysi personajlarga bog'liq:</p>
+      {characters.map((c) => (
+        <label key={c.id} style={{ marginRight: '10px' }}>
+          <input
+            type="checkbox"
+            checked={evidenceCharacters.includes(c.id)}
+            onChange={() => handleCharacterCheckbox(c.id)}
+          />
+          {c.name}
+        </label>
+      ))}
+    </div>
+    <button type="submit">Qo'shish</button>
+  </form>
+
+  <ul>
+    {evidenceList.map((ev) => (
+      <li key={ev.id}>
+        <strong>{ev.name}</strong> — {ev.is_real ? 'haqiqiy' : 'soxta'}
+        {ev.found_location && <> | topilgan joy: {ev.found_location}</>}
+        {ev.description && <div>{ev.description}</div>}
+      </li>
     ))}
   </ul>
 </section>
