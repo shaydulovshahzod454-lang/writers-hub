@@ -10,4 +10,5 @@ urlpatterns = [
     path('api/', include('characters.urls')),
     path('api/', include('chapters.urls')),
     path('api/', include('evidence.urls')),
+    path('api/', include('timeline.urls')),
 ]

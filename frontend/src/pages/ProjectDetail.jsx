@@ -4,6 +4,7 @@ import { getCharacters, createCharacter } from '../api/characters';
 import { getChapters, createChapter } from '../api/chapters';
 import { getMembers, inviteMember } from '../api/projects';
 import { getEvidence, createEvidence } from '../api/evidence';
+import { getTimelineEvents, createTimelineEvent } from '../api/timeline';
 
 function ProjectDetail() {
   const { id } = useParams();
@@ -20,22 +21,27 @@ const [evidenceDescription, setEvidenceDescription] = useState('');
 const [evidenceLocation, setEvidenceLocation] = useState('');
 const [evidenceIsReal, setEvidenceIsReal] = useState(true);
 const [evidenceCharacters, setEvidenceCharacters] = useState([]);
+const [timelineEvents, setTimelineEvents] = useState([]);
+const [eventTitle, setEventTitle] = useState('');
+const [eventTime, setEventTime] = useState('');
 
   useEffect(() => {
     loadData();
   }, [id]);
 
   async function loadData() {
-  const [charsData, chaptersData, membersData, evidenceData] = await Promise.all([
+  const [charsData, chaptersData, membersData, evidenceData, timelineData] = await Promise.all([
     getCharacters(id),
     getChapters(id),
     getMembers(id),
     getEvidence(id),
+    getTimelineEvents(id),
   ]);
   setCharacters(charsData);
   setChapters(chaptersData);
   setMembers(membersData);
   setEvidenceList(evidenceData);
+  setTimelineEvents(timelineData);
 }
 
   async function handleAddCharacter(e) {
@@ -92,6 +98,20 @@ function handleCharacterCheckbox(charId) {
       ? prev.filter((c) => c !== charId)
       : [...prev, charId]
   );
+}
+
+async function handleAddEvent(e) {
+  e.preventDefault();
+  if (!eventTitle.trim()) return;
+  await createTimelineEvent({
+    project: id,
+    title: eventTitle,
+    event_time: eventTime,
+    order: timelineEvents.length + 1,
+  });
+  setEventTitle('');
+  setEventTime('');
+  loadData();
 }
 
   return (
@@ -213,6 +233,32 @@ function handleCharacterCheckbox(charId) {
         <strong>{ev.name}</strong> — {ev.is_real ? 'haqiqiy' : 'soxta'}
         {ev.found_location && <> | topilgan joy: {ev.found_location}</>}
         {ev.description && <div>{ev.description}</div>}
+      </li>
+    ))}
+  </ul>
+</section>
+
+<section>
+  <h3>Voqealar tarixi (Timeline)</h3>
+  <form onSubmit={handleAddEvent}>
+    <input
+      type="text"
+      placeholder="Vaqt (masalan: 12-may, 18:00)"
+      value={eventTime}
+      onChange={(e) => setEventTime(e.target.value)}
+    />
+    <input
+      type="text"
+      placeholder="Voqea tavsifi"
+      value={eventTitle}
+      onChange={(e) => setEventTitle(e.target.value)}
+    />
+    <button type="submit">Qo'shish</button>
+  </form>
+  <ul>
+    {timelineEvents.map((ev) => (
+      <li key={ev.id}>
+        <strong>{ev.event_time}</strong> — {ev.title}
       </li>
     ))}
   </ul>

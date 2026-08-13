@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'characters',
     'chapters',
     'evidence',
+    'timeline',
 ]
 
 MIDDLEWARE = [
