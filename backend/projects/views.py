@@ -26,7 +26,11 @@ class ProjectMemberViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return ProjectMember.objects.filter(project__owner=self.request.user)
+        queryset = ProjectMember.objects.filter(project__owner=self.request.user)
+        project_id = self.request.query_params.get('project')
+        if project_id:
+            queryset = queryset.filter(project_id=project_id)
+        return queryset
 
     def perform_create(self, serializer):
         username = serializer.validated_data.pop('username')

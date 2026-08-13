@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getCharacters, createCharacter } from '../api/characters';
 import { getChapters, createChapter } from '../api/chapters';
+import { getMembers, inviteMember } from '../api/projects';
 
 function ProjectDetail() {
   const { id } = useParams();
@@ -9,18 +10,23 @@ function ProjectDetail() {
   const [chapters, setChapters] = useState([]);
   const [charName, setCharName] = useState('');
   const [chapterTitle, setChapterTitle] = useState('');
+  const [members, setMembers] = useState([]);
+  const [inviteUsername, setInviteUsername] = useState('');
+  const [inviteError, setInviteError] = useState('');
 
   useEffect(() => {
     loadData();
   }, [id]);
 
   async function loadData() {
-    const [charsData, chaptersData] = await Promise.all([
+    const [charsData, chaptersData, membersData] = await Promise.all([
       getCharacters(id),
       getChapters(id),
+      getMembers(id),
     ]);
     setCharacters(charsData);
     setChapters(chaptersData);
+    setMembers(membersData);
   }
 
   async function handleAddCharacter(e) {
@@ -37,6 +43,19 @@ function ProjectDetail() {
     await createChapter({ project: id, title: chapterTitle, order: chapters.length + 1 });
     setChapterTitle('');
     loadData();
+  }
+
+  async function handleInvite(e) {
+    e.preventDefault();
+    setInviteError('');
+    if (!inviteUsername.trim()) return;
+    try {
+      await inviteMember(id, inviteUsername);
+      setInviteUsername('');
+      loadData();
+    } catch (err) {
+      setInviteError('User topilmadi yoki xatolik yuz berdi');
+    }
   }
 
   return (
@@ -81,6 +100,24 @@ function ProjectDetail() {
           ))}
         </ul>
       </section>
+      <section>
+  <h3>Hamkorlar</h3>
+  <form onSubmit={handleInvite}>
+    <input
+      type="text"
+      placeholder="Username orqali taklif qilish"
+      value={inviteUsername}
+      onChange={(e) => setInviteUsername(e.target.value)}
+    />
+    <button type="submit">Taklif qilish</button>
+  </form>
+  {inviteError && <p style={{ color: 'red' }}>{inviteError}</p>}
+  <ul>
+    {members.map((m) => (
+      <li key={m.id}>{m.user}</li>
+    ))}
+  </ul>
+</section>
     </div>
   );
 }
