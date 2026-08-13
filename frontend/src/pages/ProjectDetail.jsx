@@ -5,6 +5,7 @@ import { getChapters, createChapter } from '../api/chapters';
 import { getMembers, inviteMember } from '../api/projects';
 import { getEvidence, createEvidence } from '../api/evidence';
 import { getTimelineEvents, createTimelineEvent } from '../api/timeline';
+import { getRelationships, createRelationship } from '../api/relationships';
 
 function ProjectDetail() {
   const { id } = useParams();
@@ -24,24 +25,30 @@ const [evidenceCharacters, setEvidenceCharacters] = useState([]);
 const [timelineEvents, setTimelineEvents] = useState([]);
 const [eventTitle, setEventTitle] = useState('');
 const [eventTime, setEventTime] = useState('');
+const [relationships, setRelationships] = useState([]);
+const [relFrom, setRelFrom] = useState('');
+const [relTo, setRelTo] = useState('');
+const [relType, setRelType] = useState('');
 
   useEffect(() => {
     loadData();
   }, [id]);
 
   async function loadData() {
-  const [charsData, chaptersData, membersData, evidenceData, timelineData] = await Promise.all([
+  const [charsData, chaptersData, membersData, evidenceData, timelineData, relData] = await Promise.all([
     getCharacters(id),
     getChapters(id),
     getMembers(id),
     getEvidence(id),
     getTimelineEvents(id),
+    getRelationships(id),
   ]);
   setCharacters(charsData);
   setChapters(chaptersData);
   setMembers(membersData);
   setEvidenceList(evidenceData);
   setTimelineEvents(timelineData);
+  setRelationships(relData);
 }
 
   async function handleAddCharacter(e) {
@@ -111,6 +118,20 @@ async function handleAddEvent(e) {
   });
   setEventTitle('');
   setEventTime('');
+  loadData();
+}
+
+async function handleAddRelationship(e) {
+  e.preventDefault();
+  if (!relFrom || !relTo || !relType.trim()) return;
+  await createRelationship({
+    from_character: relFrom,
+    to_character: relTo,
+    relationship_type: relType,
+  });
+  setRelFrom('');
+  setRelTo('');
+  setRelType('');
   loadData();
 }
 
@@ -259,6 +280,37 @@ async function handleAddEvent(e) {
     {timelineEvents.map((ev) => (
       <li key={ev.id}>
         <strong>{ev.event_time}</strong> — {ev.title}
+      </li>
+    ))}
+  </ul>
+</section>
+<section>
+  <h3>Munosabatlar</h3>
+  <form onSubmit={handleAddRelationship}>
+    <select value={relFrom} onChange={(e) => setRelFrom(e.target.value)}>
+      <option value="">Kimdan</option>
+      {characters.map((c) => (
+        <option key={c.id} value={c.id}>{c.name}</option>
+      ))}
+    </select>
+    <select value={relTo} onChange={(e) => setRelTo(e.target.value)}>
+      <option value="">Kimga</option>
+      {characters.map((c) => (
+        <option key={c.id} value={c.id}>{c.name}</option>
+      ))}
+    </select>
+    <input
+      type="text"
+      placeholder="Munosabat turi (Friend, Enemy...)"
+      value={relType}
+      onChange={(e) => setRelType(e.target.value)}
+    />
+    <button type="submit">Qo'shish</button>
+  </form>
+  <ul>
+    {relationships.map((r) => (
+      <li key={r.id}>
+        {r.from_character_name} → {r.to_character_name}: {r.relationship_type}
       </li>
     ))}
   </ul>
