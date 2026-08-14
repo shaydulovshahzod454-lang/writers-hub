@@ -151,10 +151,13 @@ async function handleExport() {
 
   return (
     <div>
-      <Link to="/dashboard">← Ortga</Link>
-      <h2>Loyiha #{id}</h2>
-      <button onClick={handleExport}>📄 DOCX formatida yuklab olish</button>
-
+  <div className="page-header">
+    <Link to="/dashboard">← Loyihalarim</Link>
+    <h2>Loyiha #{id}</h2>
+    <button onClick={handleExport}>📄 DOCX yuklab olish</button>
+  </div>
+<div className="detail-grid">
+    <div className="detail-col">
       <section>
         <h3>Personajlar</h3>
         <form onSubmit={handleAddCharacter}>
@@ -167,10 +170,12 @@ async function handleExport() {
           <button type="submit">Qo'shish</button>
         </form>
         <ul>
-          {characters.map((c) => (
-            <li key={c.id}>{c.name}</li>
-          ))}
-        </ul>
+  {characters.map((c) => (
+    <li key={c.id}>
+      <Link to={`/characters/${c.id}`}>{c.name}</Link>
+    </li>
+  ))}
+</ul>
       </section>
 
       <section>
@@ -192,6 +197,8 @@ async function handleExport() {
           ))}
         </ul>
       </section>
+</div>
+<div className="detail-col">
       <section>
   <h3>Hamkorlar</h3>
   <form onSubmit={handleInvite}>
@@ -330,7 +337,9 @@ async function handleExport() {
     ))}
   </ul>
 </section>
-    </div>
+</div>
+  </div>
+</div>
   );
 }
 

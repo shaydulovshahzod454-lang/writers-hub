@@ -199,3 +199,110 @@ nav {
 .ProseMirror p {
   margin: 0 0 12px;
 }
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  border: none;
+  margin: 0;
+  flex: 1;
+}
+
+.inline-form {
+  margin-bottom: 24px;
+}
+
+.empty-state {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 40px 0;
+  text-align: center;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.project-card {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  color: var(--text);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.project-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.project-card h3 {
+  margin: 0 0 6px;
+}
+
+.project-card .muted {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.project-card .card-desc {
+  font-size: 14px;
+  color: var(--text);
+  margin: 0;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-field label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.profile-field textarea,
+.profile-field input {
+  width: 100%;
+}
+
+@media (max-width: 700px) {
+  .profile-form {
+    grid-template-columns: 1fr;
+  }
+}

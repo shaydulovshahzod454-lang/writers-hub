@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProjectDetail from './pages/ProjectDetail';
 import ChapterEditor from './pages/ChapterEditor';
+import CharacterProfile from './pages/CharacterProfile';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/chapters/:id" element={<ChapterEditor />} />
         <Route path="/" element={<Login />} />
+        <Route path="/characters/:id" element={<CharacterProfile />} />
       </Routes>
     </BrowserRouter>
   );

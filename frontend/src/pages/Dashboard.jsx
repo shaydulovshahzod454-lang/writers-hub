@@ -41,29 +41,36 @@ function Dashboard() {
   if (loading) return <p>Yuklanmoqda...</p>;
 
   return (
-    <div>
+  <div>
+    <div className="page-header">
       <h2>Mening loyihalarim</h2>
-      <button onClick={handleLogout}>Chiqish</button>
-
-      <form onSubmit={handleCreate}>
-        <input
-          type="text"
-          placeholder="Yangi loyiha nomi"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <button type="submit">Yaratish</button>
-      </form>
-
-      <ul>
-        {projects.map((p) => (
-            <li key={p.id}>
-                <Link to={`/projects/${p.id}`}>{p.title}</Link> ({p.genre || 'janr yo\'q'})
-            </li>
-        ))}
-      </ul>
     </div>
-  );
+
+    <form onSubmit={handleCreate} className="inline-form">
+      <input
+        type="text"
+        placeholder="Yangi loyiha nomi"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <button type="submit">+ Yaratish</button>
+    </form>
+
+    {projects.length === 0 ? (
+      <p className="empty-state">Hali loyiha yo'q. Birinchisini yarating!</p>
+    ) : (
+      <div className="project-grid">
+        {projects.map((p) => (
+          <Link to={`/projects/${p.id}`} key={p.id} className="project-card">
+            <h3>{p.title}</h3>
+            <p className="muted">{p.genre || 'Janr belgilanmagan'}</p>
+            {p.description && <p className="card-desc">{p.description}</p>}
+          </Link>
+        ))}
+      </div>
+    )}
+  </div>
+);
 }
 
 export default Dashboard;

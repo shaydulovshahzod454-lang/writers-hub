@@ -9,3 +9,13 @@ export async function createCharacter(data) {
   const response = await apiClient.post('/characters/', data);
   return response.data;
 }
+
+export async function getCharacter(id) {
+  const response = await apiClient.get(`/characters/${id}/`);
+  return response.data;
+}
+
+export async function updateCharacter(id, data) {
+  const response = await apiClient.patch(`/characters/${id}/`, data);
+  return response.data;
+}
