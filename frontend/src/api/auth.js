@@ -15,3 +15,8 @@ export function logout() {
 export function isAuthenticated() {
   return !!localStorage.getItem('access_token');
 }
+
+export async function register(username, email, password) {
+  const response = await apiClient.post('/register/', { username, email, password });
+  return response.data;
+}

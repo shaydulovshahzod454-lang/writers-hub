@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../api/auth';
 
 function Login() {
@@ -42,6 +42,9 @@ function Login() {
       {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
       <button type="submit">Kirish</button>
     </form>
+    <p style={{ marginTop: 16 }}>
+  Akkauntingiz yo'qmi? <Link to="/register">Ro'yxatdan o'ting</Link>
+</p>
   </div>
 );
 }

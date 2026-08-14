@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import ProjectDetail from './pages/ProjectDetail';
 import ChapterEditor from './pages/ChapterEditor';
 import CharacterProfile from './pages/CharacterProfile';
+import Register from './pages/Register';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/chapters/:id" element={<ChapterEditor />} />
         <Route path="/" element={<Login />} />
         <Route path="/characters/:id" element={<CharacterProfile />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </BrowserRouter>
   );
