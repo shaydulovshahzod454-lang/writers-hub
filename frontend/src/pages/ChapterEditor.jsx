@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getChapter, updateChapter } from '../api/chapters';
 import { getComments, createComment } from '../api/comments';
+import RichTextEditor from '../components/RichTextEditor';
 
 function ChapterEditor() {
   const { id } = useParams();
@@ -48,12 +49,7 @@ function ChapterEditor() {
       <Link to={`/projects/${chapter.project}`}>← Ortga</Link>
       <h2>{chapter.title}</h2>
 
-      <textarea
-        rows={20}
-        cols={80}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      <RichTextEditor content={content} onChange={setContent} />
       <br />
       <button onClick={handleSave}>Saqlash</button>
       <span> {status}</span>

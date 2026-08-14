@@ -24,30 +24,26 @@ function Login() {
   }
 
   return (
-    <div>
-      <h2>Kirish</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div>
-          <input
-            type="password"
-            placeholder="Parol"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit">Kirish</button>
-      </form>
-    </div>
-  );
+  <div style={{ maxWidth: 320, margin: '80px auto', textAlign: 'center' }}>
+    <h2>Kirish</h2>
+    <form onSubmit={handleSubmit} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+      <input
+        type="text"
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Parol"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
+      <button type="submit">Kirish</button>
+    </form>
+  </div>
+);
 }
 
 export default Login;
