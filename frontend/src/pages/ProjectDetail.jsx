@@ -278,15 +278,12 @@ function ProjectDetail() {
         {characters.length === 0 ? (
           <p className="muted">Avval "Personajlar" bo'limida personaj qo'shing</p>
         ) : (
-          <div className="form-group">
-  <label>Qaysi personajlarga bog'liq</label>
-  <MultiSelect
-    options={characters}
-    selected={evidenceCharacters}
-    onChange={setEvidenceCharacters}
-    placeholder="Personajlarni tanlang"
-  />
-</div>
+          <MultiSelect
+            options={characters}
+            selected={evidenceCharacters}
+            onChange={setEvidenceCharacters}
+            placeholder="Personajlarni tanlang"
+          />
         )}
       </div>
 
