@@ -27,3 +27,7 @@ export function getExportUrl(projectId) {
   const token = localStorage.getItem('access_token');
   return `${import.meta.env.VITE_API_URL}/projects/${projectId}/export_docx/?token=${token}`;
 }
+
+export async function deleteProject(id) {
+  await apiClient.delete(`/projects/${id}/`);
+}

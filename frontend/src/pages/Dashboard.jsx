@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getProjects, createProject } from '../api/projects';
+import { getProjects, createProject, deleteProject  } from '../api/projects';
 import { logout } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -38,6 +38,15 @@ function Dashboard() {
     navigate('/login');
   }
 
+  async function handleDelete(e, projectId) {
+  e.preventDefault();
+  e.stopPropagation();
+  const confirmed = window.confirm('Loyihani o\'chirmoqchimisiz? Bu amalni orqaga qaytarib bo\'lmaydi.');
+  if (!confirmed) return;
+  await deleteProject(projectId);
+  loadProjects();
+}
+
   if (loading) return <p>Yuklanmoqda...</p>;
 
   return (
@@ -62,10 +71,13 @@ function Dashboard() {
       <div className="project-grid">
         {projects.map((p) => (
           <Link to={`/projects/${p.id}`} key={p.id} className="project-card">
-            <h3>{p.title}</h3>
-            <p className="muted">{p.genre || 'Janr belgilanmagan'}</p>
-            {p.description && <p className="card-desc">{p.description}</p>}
-          </Link>
+  <div className="card-top">
+    <h3>{p.title}</h3>
+    <button className="delete-btn" onClick={(e) => handleDelete(e, p.id)}>✕</button>
+  </div>
+  <p className="muted">{p.genre || 'Janr belgilanmagan'}</p>
+  {p.description && <p className="card-desc">{p.description}</p>}
+</Link>
         ))}
       </div>
     )}
