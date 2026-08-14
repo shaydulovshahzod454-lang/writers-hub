@@ -22,3 +22,8 @@ export async function getMembers(projectId) {
   const response = await apiClient.get(`/project-members/?project=${projectId}`);
   return response.data;
 }
+
+export function getExportUrl(projectId) {
+  const token = localStorage.getItem('access_token');
+  return `${import.meta.env.VITE_API_URL}/projects/${projectId}/export_docx/?token=${token}`;
+}

@@ -6,6 +6,7 @@ import { getMembers, inviteMember } from '../api/projects';
 import { getEvidence, createEvidence } from '../api/evidence';
 import { getTimelineEvents, createTimelineEvent } from '../api/timeline';
 import { getRelationships, createRelationship } from '../api/relationships';
+import apiClient from '../api/client';
 
 function ProjectDetail() {
   const { id } = useParams();
@@ -135,10 +136,24 @@ async function handleAddRelationship(e) {
   loadData();
 }
 
+async function handleExport() {
+  const response = await apiClient.get(`/projects/${id}/export_docx/`, {
+    responseType: 'blob',
+  });
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'asar.docx');
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
   return (
     <div>
       <Link to="/dashboard">← Ortga</Link>
       <h2>Loyiha #{id}</h2>
+      <button onClick={handleExport}>📄 DOCX formatida yuklab olish</button>
 
       <section>
         <h3>Personajlar</h3>
