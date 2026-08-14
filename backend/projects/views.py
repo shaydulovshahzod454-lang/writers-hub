@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from .models import Project, ProjectMember
 from .serializers import ProjectSerializer, ProjectMemberSerializer
 from django.http import HttpResponse
@@ -23,6 +23,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def perform_destroy(self, instance):
+        if instance.owner != self.request.user:
+            raise PermissionDenied('Faqat loyiha egasi uni o\'chira oladi.')
+        instance.delete()
 
     @action(detail=True, methods=['get'])
     def export_docx(self, request, pk=None):

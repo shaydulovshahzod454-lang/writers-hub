@@ -43,8 +43,16 @@ function Dashboard() {
   e.stopPropagation();
   const confirmed = window.confirm('Loyihani o\'chirmoqchimisiz? Bu amalni orqaga qaytarib bo\'lmaydi.');
   if (!confirmed) return;
-  await deleteProject(projectId);
-  loadProjects();
+  try {
+    await deleteProject(projectId);
+    loadProjects();
+  } catch (err) {
+    if (err.response && err.response.status === 403) {
+      alert('Faqat loyiha egasi uni o\'chira oladi.');
+    } else {
+      alert('O\'chirishda xatolik yuz berdi.');
+    }
+  }
 }
 
   if (loading) return <p>Yuklanmoqda...</p>;
