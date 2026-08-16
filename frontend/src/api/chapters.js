@@ -19,3 +19,7 @@ export async function updateChapter(id, data) {
   const response = await apiClient.patch(`/chapters/${id}/`, data);
   return response.data;
 }
+
+export async function reorderChapters(order) {
+  await apiClient.post('/chapters/reorder/', { order });
+}

@@ -607,3 +607,21 @@ button .spinner {
 .edit-toggle-btn:hover {
   background: var(--border);
 }
+
+.sortable-chapter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--text-muted);
+  font-size: 16px;
+  user-select: none;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}

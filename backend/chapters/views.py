@@ -2,6 +2,8 @@ from django.db.models import Q
 from rest_framework import viewsets, permissions
 from .models import Chapter, Comment
 from .serializers import ChapterSerializer, CommentSerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 
 class ChapterViewSet(viewsets.ModelViewSet):
@@ -17,6 +19,14 @@ class ChapterViewSet(viewsets.ModelViewSet):
         if project_id:
             queryset = queryset.filter(project_id=project_id)
         return queryset
+
+    @action(detail=False, methods=['post'])
+    def reorder(self, request):
+        order_data = request.data.get('order', [])
+        queryset = self.get_queryset()
+        for item in order_data:
+            queryset.filter(id=item['id']).update(order=item['order'])
+        return Response({'status': 'ok'})
 
 
 class CommentViewSet(viewsets.ModelViewSet):

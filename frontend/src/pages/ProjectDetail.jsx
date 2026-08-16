@@ -8,6 +8,10 @@ import { getTimelineEvents, createTimelineEvent } from '../api/timeline';
 import { getRelationships, createRelationship } from '../api/relationships';
 import apiClient from '../api/client';
 import MultiSelect from '../components/MultiSelect';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import SortableChapterItem from '../components/SortableChapterItem';
+import { reorderChapters } from '../api/chapters';
 
 const TABS = [
   { key: 'chapters', label: '📝 Boblar' },
@@ -81,6 +85,22 @@ function ProjectDetail() {
     setChapterTitle('');
     loadData();
   }
+
+  async function handleChapterDragEnd(event) {
+  const { active, over } = event;
+  if (!over || active.id === over.id) return;
+
+  const oldIndex = chapters.findIndex((c) => c.id === active.id);
+  const newIndex = chapters.findIndex((c) => c.id === over.id);
+  const reordered = arrayMove(chapters, oldIndex, newIndex);
+
+  const withNewOrder = reordered.map((c, index) => ({ ...c, order: index + 1 }));
+  setChapters(withNewOrder);
+
+  await reorderChapters(
+    withNewOrder.map((c) => ({ id: c.id, order: c.order }))
+  );
+}
 
   async function handleInvite(e) {
     e.preventDefault();
@@ -195,13 +215,15 @@ function ProjectDetail() {
                 />
                 <button type="submit">Qo'shish</button>
               </form>
-              <ul>
-                {chapters.map((ch) => (
-                  <li key={ch.id}>
-                    <Link to={`/chapters/${ch.id}`}>{ch.order}. {ch.title}</Link>
-                  </li>
-                ))}
-              </ul>
+              <DndContext collisionDetection={closestCenter} onDragEnd={handleChapterDragEnd}>
+  <SortableContext items={chapters.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+    <ul>
+      {chapters.map((ch) => (
+        <SortableChapterItem key={ch.id} chapter={ch} />
+      ))}
+    </ul>
+  </SortableContext>
+</DndContext>
             </section>
           )}
 
