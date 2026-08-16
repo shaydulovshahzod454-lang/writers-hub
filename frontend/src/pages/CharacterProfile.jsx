@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getCharacter, updateCharacter } from '../api/characters';
+import Spinner from '../components/Spinner';
 
 const FIELDS = [
   { key: 'name', label: 'Ism', type: 'text' },
@@ -19,6 +20,7 @@ function CharacterProfile() {
   const [character, setCharacter] = useState(null);
   const [form, setForm] = useState({});
   const [status, setStatus] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadCharacter();
@@ -35,20 +37,24 @@ function CharacterProfile() {
   }
 
   async function handleSave() {
-    setStatus('Saqlanmoqda...');
-    await updateCharacter(id, form);
-    setStatus('Saqlandi ✓');
-    setTimeout(() => setStatus(''), 2000);
-  }
+  setSaving(true);
+  await updateChapter(id, { content });
+  setSaving(false);
+  setStatus('Saqlandi ✓');
+  setTimeout(() => setStatus(''), 2000);
+}
 
-  if (!character) return <p>Yuklanmoqda...</p>;
-
+  if (!character) return <div className="page-loading"><Spinner size={36} /></div>;
   return (
     <div>
       <div className="page-header">
         <Link to={`/projects/${character.project}`}>← Loyihaga qaytish</Link>
         <h2>{character.name || 'Yangi personaj'}</h2>
-        <button onClick={handleSave}>Saqlash</button>
+        <button onClick={handleSave} disabled={saving} className={saving ? 'btn-loading' : ''}>
+  {saving && <Spinner size={16} />}
+  {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+</button>
+<span> {!saving && status}</span>
         <span className="muted">{status}</span>
       </div>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register, login } from '../api/auth';
+import Spinner from '../components/Spinner';
 
 function Register() {
   const [username, setUsername] = useState('');
@@ -8,23 +9,27 @@ function Register() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    setError('');
-    try {
-      await register(username, email, password);
-      await login(username, password);
-      navigate('/dashboard');
-    } catch (err) {
-      if (err.response?.data) {
-        const messages = Object.values(err.response.data).flat().join(' ');
-        setError(messages || 'Ro\'yxatdan o\'tishda xatolik');
-      } else {
-        setError('Ro\'yxatdan o\'tishda xatolik');
-      }
+  e.preventDefault();
+  setError('');
+  setLoading(true);
+  try {
+    await register(username, email, password);
+    await login(username, password);
+    navigate('/dashboard');
+  } catch (err) {
+    if (err.response?.data) {
+      const messages = Object.values(err.response.data).flat().join(' ');
+      setError(messages || 'Ro\'yxatdan o\'tishda xatolik');
+    } else {
+      setError('Ro\'yxatdan o\'tishda xatolik');
     }
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <div style={{ maxWidth: 320, margin: '80px auto', textAlign: 'center' }}>
@@ -49,7 +54,10 @@ function Register() {
           onChange={(e) => setPassword(e.target.value)}
         />
         {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
-        <button type="submit">Ro'yxatdan o'tish</button>
+        <button type="submit" disabled={loading} className={loading ? 'btn-loading' : ''}>
+  {loading && <Spinner size={16} />}
+  {loading ? 'Kuting...' : 'Ro\'yxatdan o\'tish'}
+</button>
       </form>
       <p style={{ marginTop: 16 }}>
         Akkauntingiz bormi? <Link to="/login">Kirish</Link>

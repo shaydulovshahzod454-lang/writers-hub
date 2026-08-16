@@ -11,6 +11,7 @@ function ChapterEditor() {
   const [status, setStatus] = useState('');
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadChapter();
@@ -27,11 +28,12 @@ function ChapterEditor() {
 }
 
   async function handleSave() {
-    setStatus('Saqlanmoqda...');
-    await updateChapter(id, { content });
-    setStatus('Saqlandi ✓');
-    setTimeout(() => setStatus(''), 2000);
-  }
+  setSaving(true);
+  await updateChapter(id, { content });
+  setSaving(false);
+  setStatus('Saqlandi ✓');
+  setTimeout(() => setStatus(''), 2000);
+}
 
   async function handleAddComment(e) {
   e.preventDefault();
@@ -62,7 +64,11 @@ function ChapterEditor() {
       value={commentText}
       onChange={(e) => setCommentText(e.target.value)}
     />
-    <button type="submit">Yuborish</button>
+    <button onClick={handleSave} disabled={saving} className={saving ? 'btn-loading' : ''}>
+  {saving && <Spinner size={16} />}
+  {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+</button>
+<span> {!saving && status}</span>
   </form>
   <ul>
     {comments.map((c) => (

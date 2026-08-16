@@ -3,6 +3,7 @@ import { getProjects, createProject, deleteProject  } from '../api/projects';
 import { logout } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import Spinner from '../components/Spinner';
 
 function Dashboard() {
   const [projects, setProjects] = useState([]);
@@ -55,7 +56,7 @@ function Dashboard() {
   }
 }
 
-  if (loading) return <p>Yuklanmoqda...</p>;
+  if (loading) return <div className="page-loading"><Spinner size={36} /></div>;
 
   return (
   <div>
