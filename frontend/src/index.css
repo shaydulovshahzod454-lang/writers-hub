@@ -563,3 +563,47 @@ button .spinner {
   border-color: rgba(255, 255, 255, 0.4);
   border-top-color: white;
 }
+
+.profile-view {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.profile-view-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.profile-view-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-view-label {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.profile-view-value {
+  margin: 0;
+  font-size: 15px;
+  white-space: pre-wrap;
+}
+
+.edit-toggle-btn {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.edit-toggle-btn:hover {
+  background: var(--border);
+}
