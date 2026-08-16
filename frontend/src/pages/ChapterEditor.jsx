@@ -50,15 +50,6 @@ const [aiResult, setAiResult] = useState('');
   setComments(updated);
 }
 
-function handleSelectionComment() {
-  const selection = window.getSelection().toString().trim();
-  if (!selection) {
-    alert('Avval matn ichidan biror qismni belgilang.');
-    return;
-  }
-  setQuotedText(selection);
-}
-
   async function handleCheckConsistency() {
   setChecking(true);
   setAiResult('');
@@ -79,7 +70,11 @@ function handleSelectionComment() {
       <Link to={`/projects/${chapter.project}`}>← Ortga</Link>
       <h2>{chapter.title}</h2>
 
-      <RichTextEditor content={content} onChange={setContent} />
+      <RichTextEditor
+  content={content}
+  onChange={setContent}
+  onCommentRequest={(text) => setQuotedText(text)}
+/>
       <br />
       <button onClick={handleSave} disabled={saving} className={saving ? 'btn-loading' : ''}>
         {saving && <Spinner size={16} />}
@@ -102,9 +97,6 @@ function handleSelectionComment() {
 
       <section>
   <h3>Izohlar</h3>
-  <button type="button" onClick={handleSelectionComment} className="edit-toggle-btn">
-    💬 Belgilangan matnga izoh
-  </button>
 
   <form onSubmit={handleAddComment}>
     {quotedText && (

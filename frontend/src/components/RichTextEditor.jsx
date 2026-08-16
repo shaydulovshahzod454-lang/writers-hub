@@ -1,13 +1,31 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-function RichTextEditor({ content, onChange }) {
+function RichTextEditor({ content, onChange, onCommentRequest }) {
+  const [selectionBox, setSelectionBox] = useState(null);
+
   const editor = useEditor({
     extensions: [StarterKit],
     content: content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+    },
+    onSelectionUpdate: ({ editor }) => {
+      const { from, to } = editor.state.selection;
+      if (from === to) {
+        setSelectionBox(null);
+        return;
+      }
+      const start = editor.view.coordsAtPos(from);
+      const end = editor.view.coordsAtPos(to);
+      const editorRect = editor.view.dom.getBoundingClientRect();
+
+      setSelectionBox({
+        top: start.top - editorRect.top - 38,
+        left: (start.left + end.left) / 2 - editorRect.left,
+        text: editor.state.doc.textBetween(from, to, ' '),
+      });
     },
   });
 
@@ -20,8 +38,13 @@ function RichTextEditor({ content, onChange }) {
 
   if (!editor) return null;
 
+  function handleCommentClick() {
+    onCommentRequest(selectionBox.text);
+    setSelectionBox(null);
+  }
+
   return (
-    <div className="editor-wrapper">
+    <div className="editor-wrapper" style={{ position: 'relative' }}>
       <div className="editor-toolbar">
         <button type="button" onClick={() => editor.chain().focus().toggleBold().run()}>
           <b>B</b>
@@ -36,7 +59,20 @@ function RichTextEditor({ content, onChange }) {
           • Ro'yxat
         </button>
       </div>
-      <EditorContent editor={editor} />
+
+      <div style={{ position: 'relative' }}>
+        <EditorContent editor={editor} />
+        {selectionBox && (
+          <button
+            type="button"
+            className="floating-comment-btn"
+            style={{ top: selectionBox.top, left: selectionBox.left }}
+            onClick={handleCommentClick}
+          >
+            💬 Izoh
+          </button>
+        )}
+      </div>
     </div>
   );
 }

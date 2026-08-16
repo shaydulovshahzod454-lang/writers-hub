@@ -683,3 +683,21 @@ button .spinner {
 .quoted-preview.small p {
   font-size: 13px;
 }
+
+.floating-comment-btn {
+  position: absolute;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+  white-space: nowrap;
+}
+
+.floating-comment-btn:hover {
+  background: var(--accent);
+}
