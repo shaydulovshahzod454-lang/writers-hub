@@ -5,10 +5,11 @@ export async function getComments(chapterId) {
   return response.data;
 }
 
-export async function createComment(chapterId, text) {
+export async function createComment(chapterId, text, quotedText = '') {
   const response = await apiClient.post('/comments/', {
     chapter: chapterId,
     text,
+    quoted_text: quotedText,
   });
   return response.data;
 }

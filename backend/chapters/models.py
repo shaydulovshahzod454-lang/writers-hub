@@ -32,6 +32,7 @@ class Comment(models.Model):
         on_delete=models.CASCADE
     )
     text = models.TextField()
+    quoted_text = models.TextField(blank=True)
     resolved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

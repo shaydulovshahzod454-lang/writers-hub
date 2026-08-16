@@ -643,3 +643,43 @@ button .spinner {
   color: var(--accent);
   font-family: 'Segoe UI', sans-serif;
 }
+
+.quoted-preview {
+  background: var(--bg);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.quoted-preview p {
+  margin: 4px 0 0;
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.quoted-label {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.clear-quote-btn {
+  background: transparent;
+  color: var(--danger);
+  border: none;
+  padding: 2px 0;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.quoted-preview.small {
+  margin-bottom: 6px;
+  padding: 6px 10px;
+}
+
+.quoted-preview.small p {
+  font-size: 13px;
+}

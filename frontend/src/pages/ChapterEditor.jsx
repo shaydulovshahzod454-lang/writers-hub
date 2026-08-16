@@ -14,6 +14,7 @@ function ChapterEditor() {
   const [saving, setSaving] = useState(false);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
+  const [quotedText, setQuotedText] = useState('');
   const [checking, setChecking] = useState(false);
 const [aiResult, setAiResult] = useState('');
 
@@ -40,13 +41,23 @@ const [aiResult, setAiResult] = useState('');
   }
 
   async function handleAddComment(e) {
-    e.preventDefault();
-    if (!commentText.trim()) return;
-    await createComment(id, commentText);
-    setCommentText('');
-    const updated = await getComments(id);
-    setComments(updated);
+  e.preventDefault();
+  if (!commentText.trim()) return;
+  await createComment(id, commentText, quotedText);
+  setCommentText('');
+  setQuotedText('');
+  const updated = await getComments(id);
+  setComments(updated);
+}
+
+function handleSelectionComment() {
+  const selection = window.getSelection().toString().trim();
+  if (!selection) {
+    alert('Avval matn ichidan biror qismni belgilang.');
+    return;
   }
+  setQuotedText(selection);
+}
 
   async function handleCheckConsistency() {
   setChecking(true);
@@ -90,24 +101,41 @@ const [aiResult, setAiResult] = useState('');
 </div>
 
       <section>
-        <h3>Izohlar</h3>
-        <form onSubmit={handleAddComment}>
-          <input
-            type="text"
-            placeholder="Izoh yozing"
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-          />
-          <button type="submit">Yuborish</button>
-        </form>
-        <ul>
-          {comments.map((c) => (
-            <li key={c.id}>
-              <strong>{c.author}:</strong> {c.text}
-            </li>
-          ))}
-        </ul>
-      </section>
+  <h3>Izohlar</h3>
+  <button type="button" onClick={handleSelectionComment} className="edit-toggle-btn">
+    💬 Belgilangan matnga izoh
+  </button>
+
+  <form onSubmit={handleAddComment}>
+    {quotedText && (
+      <div className="quoted-preview">
+        <span className="quoted-label">Izoh qoldirilayotgan matn:</span>
+        <p>"{quotedText}"</p>
+        <button type="button" onClick={() => setQuotedText('')} className="clear-quote-btn">✕ Bekor qilish</button>
+      </div>
+    )}
+    <input
+      type="text"
+      placeholder="Izoh yozing"
+      value={commentText}
+      onChange={(e) => setCommentText(e.target.value)}
+    />
+    <button type="submit">Yuborish</button>
+  </form>
+
+  <ul>
+    {comments.map((c) => (
+      <li key={c.id}>
+        {c.quoted_text && (
+          <div className="quoted-preview small">
+            <p>"{c.quoted_text}"</p>
+          </div>
+        )}
+        <strong>{c.author}:</strong> {c.text}
+      </li>
+    ))}
+  </ul>
+</section>
     </div>
   );
 }
