@@ -162,7 +162,7 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://writers-hub-mu.vercel.app/",
+    "https://writers-hub-mu.vercel.app",
 ]
 
 SIMPLE_JWT = {
