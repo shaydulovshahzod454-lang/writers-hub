@@ -625,3 +625,21 @@ button .spinner {
 .drag-handle:active {
   cursor: grabbing;
 }
+
+.ai-check-block {
+  margin-top: 20px;
+}
+
+.ai-result {
+  margin-top: 14px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.ai-result h4 {
+  margin: 0 0 10px;
+  color: var(--accent);
+  font-family: 'Segoe UI', sans-serif;
+}

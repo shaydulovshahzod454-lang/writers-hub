@@ -4,6 +4,7 @@ import { getChapter, updateChapter } from '../api/chapters';
 import { getComments, createComment } from '../api/comments';
 import RichTextEditor from '../components/RichTextEditor';
 import Spinner from '../components/Spinner';
+import { checkConsistency } from '../api/chapters';
 
 function ChapterEditor() {
   const { id } = useParams();
@@ -13,6 +14,8 @@ function ChapterEditor() {
   const [saving, setSaving] = useState(false);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
+  const [checking, setChecking] = useState(false);
+const [aiResult, setAiResult] = useState('');
 
   useEffect(() => {
     loadChapter();
@@ -45,6 +48,19 @@ function ChapterEditor() {
     setComments(updated);
   }
 
+  async function handleCheckConsistency() {
+  setChecking(true);
+  setAiResult('');
+  try {
+    const data = await checkConsistency(id);
+    setAiResult(data.result);
+  } catch (err) {
+    setAiResult('Xatolik yuz berdi. Qaytadan urinib ko\'ring.');
+  } finally {
+    setChecking(false);
+  }
+}
+
   if (!chapter) return <div className="page-loading"><Spinner size={36} /></div>;
 
   return (
@@ -59,6 +75,19 @@ function ChapterEditor() {
         {saving ? 'Saqlanmoqda...' : 'Saqlash'}
       </button>
       <span> {!saving && status}</span>
+
+      <div className="ai-check-block">
+  <button onClick={handleCheckConsistency} disabled={checking} className={checking ? 'btn-loading' : ''}>
+    {checking && <Spinner size={16} />}
+    {checking ? 'Tekshirilmoqda...' : '🤖 AI orqali tekshirish'}
+  </button>
+  {aiResult && (
+    <div className="ai-result">
+      <h4>Natija</h4>
+      <p style={{ whiteSpace: 'pre-wrap' }}>{aiResult}</p>
+    </div>
+  )}
+</div>
 
       <section>
         <h3>Izohlar</h3>

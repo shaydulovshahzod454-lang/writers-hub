@@ -23,3 +23,8 @@ export async function updateChapter(id, data) {
 export async function reorderChapters(order) {
   await apiClient.post('/chapters/reorder/', { order });
 }
+
+export async function checkConsistency(chapterId) {
+  const response = await apiClient.post(`/chapters/${chapterId}/check_consistency/`);
+  return response.data;
+}
