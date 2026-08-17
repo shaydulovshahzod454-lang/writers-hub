@@ -7,13 +7,14 @@ import ProjectDetail from './pages/ProjectDetail';
 import ChapterEditor from './pages/ChapterEditor';
 import CharacterProfile from './pages/CharacterProfile';
 import Register from './pages/Register';
+import Home from './pages/Home';
 
 function App() {
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/projects/:id" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />
