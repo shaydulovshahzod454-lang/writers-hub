@@ -760,3 +760,21 @@ button .spinner {
   width: 28px;
   display: block;
 }
+
+.nav-username {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.nav-register-btn {
+  background: var(--accent);
+  color: white !important;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+}
+
+.nav-register-btn:hover {
+  background: var(--accent-hover);
+  text-decoration: none !important;
+}

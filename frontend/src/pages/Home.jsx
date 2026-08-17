@@ -1,6 +1,11 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
+import { isAuthenticated } from '../api/auth';
 
 function Home() {
+  if (isAuthenticated()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <div className="landing">
       <section className="landing-hero">

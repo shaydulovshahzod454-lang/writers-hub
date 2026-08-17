@@ -1,9 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { logout, isAuthenticated } from '../api/auth';
+import { logout, isAuthenticated, getUsername } from '../api/auth';
 import logoIcon from '../assets/logo-icon.png';
 
 function Navbar() {
   const navigate = useNavigate();
+  const authed = isAuthenticated();
 
   function handleLogout() {
     logout();
@@ -13,15 +14,21 @@ function Navbar() {
   return (
     <nav>
       <div className="nav-brand">
-        <Link to="/">
+        <Link to={authed ? '/dashboard' : '/'}>
           <img src={logoIcon} alt="" className="nav-logo" />
           <span>Writers Hub</span>
         </Link>
       </div>
-      {isAuthenticated() && (
+      {authed ? (
         <div className="nav-actions">
+          <span className="nav-username">👤 {getUsername()}</span>
           <Link to="/dashboard">Loyihalarim</Link>
           <button onClick={handleLogout}>Chiqish</button>
+        </div>
+      ) : (
+        <div className="nav-actions">
+          <Link to="/login">Kirish</Link>
+          <Link to="/register" className="nav-register-btn">Ro'yxatdan o'tish</Link>
         </div>
       )}
     </nav>
