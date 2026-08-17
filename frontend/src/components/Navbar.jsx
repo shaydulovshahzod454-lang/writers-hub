@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { logout, isAuthenticated } from '../api/auth';
-import logoIcon from '../assets/logo-icon.jgp';
+import logoIcon from '../assets/logo-icon.png';
 
 function Navbar() {
   const navigate = useNavigate();
