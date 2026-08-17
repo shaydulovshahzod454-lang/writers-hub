@@ -16,7 +16,7 @@ class ChapterViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = Chapter.objects.filter(
             Q(project__owner=user) | Q(project__members__user=user)
-        ).distinct()
+        ).select_related('project').distinct()
         project_id = self.request.query_params.get('project')
         if project_id:
             queryset = queryset.filter(project_id=project_id)
@@ -90,7 +90,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = Comment.objects.filter(
             Q(chapter__project__owner=user) | Q(chapter__project__members__user=user)
-        ).distinct()
+        ).select_related('author', 'chapter').distinct()
         chapter_id = self.request.query_params.get('chapter')
         if chapter_id:
             queryset = queryset.filter(chapter_id=chapter_id)

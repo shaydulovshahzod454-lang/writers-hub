@@ -19,7 +19,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Project.objects.filter(
             Q(owner=self.request.user) | Q(members__user=self.request.user)
-        ).distinct()
+        ).select_related('owner').distinct()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -59,7 +59,7 @@ class ProjectMemberViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = ProjectMember.objects.filter(
             Q(project__owner=user) | Q(project__members__user=user)
-        ).distinct()
+        ).select_related('user', 'project').distinct()
         project_id = self.request.query_params.get('project')
         if project_id:
             queryset = queryset.filter(project_id=project_id)

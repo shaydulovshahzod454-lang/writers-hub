@@ -264,19 +264,6 @@ nav {
   margin: 0;
 }
 
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 20px;
-  align-items: start;
-}
-
-@media (max-width: 800px) {
-  .detail-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .profile-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -412,31 +399,6 @@ nav {
 
 .submit-btn {
   align-self: flex-start;
-}
-
-.chip-select {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.chip {
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 13px;
-}
-
-.chip:hover {
-  border-color: var(--accent);
-}
-
-.chip.active {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
 }
 
 .item-list {

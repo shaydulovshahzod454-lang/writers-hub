@@ -12,7 +12,7 @@ class TimelineEventViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = TimelineEvent.objects.filter(
             Q(project__owner=user) | Q(project__members__user=user)
-        ).distinct()
+        ).select_related('project').distinct()
         project_id = self.request.query_params.get('project')
         if project_id:
             queryset = queryset.filter(project_id=project_id)
