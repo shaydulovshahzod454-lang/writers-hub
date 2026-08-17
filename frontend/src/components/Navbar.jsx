@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { logout, isAuthenticated } from '../api/auth';
-import logo from '../assets/logo.png';
+import logoIcon from '../assets/logo-icon.png';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -13,10 +13,11 @@ function Navbar() {
   return (
     <nav>
       <div className="nav-brand">
-  <Link to="/">
-    <img src={logo} alt="Writers Hub" className="nav-logo" />
-  </Link>
-</div>
+        <Link to="/">
+          <img src={logoIcon} alt="" className="nav-logo" />
+          <span>Writers Hub</span>
+        </Link>
+      </div>
       {isAuthenticated() && (
         <div className="nav-actions">
           <Link to="/dashboard">Loyihalarim</Link>

@@ -152,6 +152,9 @@ nav {
   font-size: 18px;
   font-weight: bold;
   color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .nav-actions {
@@ -753,6 +756,7 @@ button .spinner {
 }
 
 .nav-logo {
-  height: 32px;
+  height: 28px;
+  width: 28px;
   display: block;
 }
