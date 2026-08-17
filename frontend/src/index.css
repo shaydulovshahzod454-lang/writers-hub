@@ -751,3 +751,8 @@ button .spinner {
   font-size: 14px;
   color: var(--text-muted);
 }
+
+.nav-logo {
+  height: 32px;
+  display: block;
+}

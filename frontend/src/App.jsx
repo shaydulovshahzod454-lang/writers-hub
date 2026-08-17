@@ -15,12 +15,12 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/projects/:id" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />
         <Route path="/chapters/:id" element={<PrivateRoute><ChapterEditor /></PrivateRoute>} />
         <Route path="/characters/:id" element={<PrivateRoute><CharacterProfile /></PrivateRoute>} />
-        <Route path="/" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );
