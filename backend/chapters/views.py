@@ -47,6 +47,17 @@ class ChapterViewSet(viewsets.ModelViewSet):
             for ev in evidence
         ]) or "Dalillar hali kiritilmagan."
 
+        chapter_content = chapter.content or ''
+        if not chapter_content.strip():
+            return Response(
+                {'error': 'Bob matni bo\'sh, tekshirish uchun avval biror narsa yozing.'},
+                status=400
+            )
+
+        MAX_CONTENT_CHARS = 12000
+        if len(chapter_content) > MAX_CONTENT_CHARS:
+            chapter_content = chapter_content[:MAX_CONTENT_CHARS] + '\n\n[...matn juda uzun, qisqartirildi...]'
+
         prompt = f"""Sen detektiv/mystery janridagi asarni tahrirlovchi yordamchisan.
 Quyida loyihaning ma'lumot bazasi (personajlar, timeline, dalillar) va yozuvchi yozayotgan bob matni berilgan.
 
@@ -60,18 +71,25 @@ DALILLAR:
 {evidence_info}
 
 BOB MATNI:
-{chapter.content}
+{chapter_content}
 
 Vazifang: bob matnini yuqoridagi ma'lumot bazasi bilan solishtir. Agar ziddiyat topsang (masalan personaj tavsifiga mos kelmaydigan xatti-harakat, timeline bilan mos kelmaydigan vaqt, dalil bilan zid keladigan tafsilot), har birini aniq ko'rsat va qanday tuzatish mumkinligini qisqacha taklif qil. Agar ziddiyat topmasang, shuni aniq ayt. Javobni o'zbek tilida, qisqa va aniq ro'yxat shaklida ber."""
 
-        client = Groq(api_key=settings.GROQ_API_KEY)
-        completion = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
-            max_tokens=1000,
-            messages=[{"role": "user", "content": prompt}]
-        )
+        try:
+            client = Groq(api_key=settings.GROQ_API_KEY)
+            completion = client.chat.completions.create(
+                model="openai/gpt-oss-120b",
+                max_tokens=1000,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            result = completion.choices[0].message.content
+        except Exception:
+            return Response(
+                {'error': 'AI xizmati bilan bog\'lanishda xatolik yuz berdi. Birozdan so\'ng qaytadan urinib ko\'ring.'},
+                status=502
+            )
 
-        return Response({'result': completion.choices[0].message.content})
+        return Response({'result': result})
 
     @action(detail=False, methods=['post'])
     def reorder(self, request):

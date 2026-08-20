@@ -56,7 +56,8 @@ function ChapterEditor() {
       const data = await checkConsistency(id);
       setAiResult(data.result);
     } catch (err) {
-      setAiResult('Xatolik yuz berdi. Qaytadan urinib ko\'ring.');
+      const backendError = err.response?.data?.error;
+      setAiResult(backendError || 'Xatolik yuz berdi. Qaytadan urinib ko\'ring.');
     } finally {
       setChecking(false);
     }
