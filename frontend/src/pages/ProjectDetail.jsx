@@ -399,7 +399,7 @@ function ProjectDetail() {
               <form onSubmit={handleInvite}>
                 <input
                   type="text"
-                  placeholder="Username orqali taklif qilish"
+                  placeholder="Email orqali taklif qilish"
                   value={inviteUsername}
                   onChange={(e) => setInviteUsername(e.target.value)}
                 />
@@ -407,10 +407,10 @@ function ProjectDetail() {
               </form>
               {inviteError && <p style={{ color: 'var(--danger)' }}>{inviteError}</p>}
               <ul>
-                {members.map((m) => (
-                  <li key={m.id}>{m.user}</li>
-                ))}
-              </ul>
+  {members.map((m) => (
+    <li key={m.id}>{m.user_name || m.user_email}</li>
+  ))}
+</ul>
             </section>
           )}
         </div>

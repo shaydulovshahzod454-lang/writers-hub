@@ -10,10 +10,10 @@ export async function createProject(data) {
   return response.data;
 }
 
-export async function inviteMember(projectId, username) {
+export async function inviteMember(projectId, email) {
   const response = await apiClient.post('/project-members/', {
     project: projectId,
-    username,
+    email,
   });
   return response.data;
 }

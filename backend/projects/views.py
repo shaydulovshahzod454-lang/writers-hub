@@ -65,10 +65,10 @@ class ProjectMemberViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(project_id=project_id)
         return queryset
 
-    def perform_create(self, serializer):
-        username = serializer.validated_data.pop('username')
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise ValidationError({'username': 'User topilmadi'})
-        serializer.save(user=user)
+        def perform_create(self, serializer):
+            email = serializer.validated_data.pop('email')
+            try:
+                user = User.objects.get(email__iexact=email)
+            except User.DoesNotExist:
+                raise ValidationError({'email': 'Bu email bilan foydalanuvchi topilmadi'})
+            serializer.save(user=user)

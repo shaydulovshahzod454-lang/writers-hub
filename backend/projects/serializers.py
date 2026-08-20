@@ -13,9 +13,11 @@ class ProjectSerializer(serializers.ModelSerializer):
         ]
 
 class ProjectMemberSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)
+    email = serializers.EmailField(write_only=True)
     user = serializers.ReadOnlyField(source='user.username')
+    user_email = serializers.ReadOnlyField(source='user.email')
+    user_name = serializers.ReadOnlyField(source='user.first_name')
 
     class Meta:
         model = ProjectMember
-        fields = ['id', 'project', 'user', 'username', 'joined_at']
+        fields = ['id', 'project', 'user', 'user_email', 'user_name', 'email', 'joined_at']
