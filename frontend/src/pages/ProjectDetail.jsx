@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getCharacters, createCharacter, deleteCharacter } from '../api/characters';
 import { getChapters, createChapter, reorderChapters, deleteChapter } from '../api/chapters';
 import { getMembers, inviteMember } from '../api/projects';
@@ -27,7 +27,10 @@ function confirmDelete(message) {
 
 function ProjectDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('chapters');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const [characters, setCharacters] = useState([]);
   const [chapters, setChapters] = useState([]);
@@ -216,11 +219,84 @@ function ProjectDetail() {
     link.remove();
   }
 
+    const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+
+    const results = [];
+
+    chapters.forEach((ch) => {
+      if (ch.title.toLowerCase().includes(q)) {
+        results.push({ type: 'Bob', icon: '📝', label: ch.title, key: `ch-${ch.id}`, link: `/chapters/${ch.id}` });
+      }
+    });
+    characters.forEach((c) => {
+      if (c.name.toLowerCase().includes(q)) {
+        results.push({ type: 'Personaj', icon: '👤', label: c.name, key: `char-${c.id}`, link: `/characters/${c.id}` });
+      }
+    });
+    evidenceList.forEach((ev) => {
+      if (ev.name.toLowerCase().includes(q)) {
+        results.push({ type: 'Dalil', icon: '🔍', label: ev.name, key: `ev-${ev.id}`, tab: 'evidence' });
+      }
+    });
+    timelineEvents.forEach((ev) => {
+      if (ev.title.toLowerCase().includes(q)) {
+        results.push({ type: 'Timeline', icon: '🕐', label: ev.title, key: `tl-${ev.id}`, tab: 'timeline' });
+      }
+    });
+
+    return results.slice(0, 15);
+  }, [searchQuery, chapters, characters, evidenceList, timelineEvents]);
+
+  function handleSearchResultClick(result) {
+    setSearchQuery('');
+    setSearchOpen(false);
+    if (result.link) {
+      navigate(result.link);
+    } else if (result.tab) {
+      setActiveTab(result.tab);
+    }
+  }
+
   return (
     <div>
-      <div className="page-header">
+            <div className="page-header">
         <Link to="/dashboard">← Loyihalarim</Link>
         <h2>Loyiha #{id}</h2>
+        <div className="project-search">
+          <input
+            type="text"
+            placeholder="🔎 Loyiha bo'yicha qidirish..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setSearchOpen(true);
+            }}
+            onFocus={() => setSearchOpen(true)}
+            onBlur={() => setTimeout(() => setSearchOpen(false), 150)}
+          />
+          {searchOpen && searchQuery.trim() && (
+            <div className="search-dropdown">
+              {searchResults.length === 0 ? (
+                <p className="search-empty">Hech narsa topilmadi</p>
+              ) : (
+                searchResults.map((r) => (
+                  <button
+                    key={r.key}
+                    type="button"
+                    className="search-result-item"
+                    onMouseDown={() => handleSearchResultClick(r)}
+                  >
+                    <span className="search-result-icon">{r.icon}</span>
+                    <span className="search-result-label">{r.label}</span>
+                    <span className="search-result-type">{r.type}</span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
         <button onClick={handleExport}>📄 DOCX yuklab olish</button>
       </div>
 
