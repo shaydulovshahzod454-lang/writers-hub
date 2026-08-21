@@ -9,3 +9,7 @@ export async function createEvidence(data) {
   const response = await apiClient.post('/evidence/', data);
   return response.data;
 }
+
+export async function deleteEvidence(id) {
+  await apiClient.delete(`/evidence/${id}/`);
+}

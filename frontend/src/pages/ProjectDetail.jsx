@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getCharacters, createCharacter } from '../api/characters';
-import { getChapters, createChapter } from '../api/chapters';
+import { getCharacters, createCharacter, deleteCharacter } from '../api/characters';
+import { getChapters, createChapter, reorderChapters, deleteChapter } from '../api/chapters';
 import { getMembers, inviteMember } from '../api/projects';
-import { getEvidence, createEvidence } from '../api/evidence';
-import { getTimelineEvents, createTimelineEvent } from '../api/timeline';
-import { getRelationships, createRelationship } from '../api/relationships';
+import { getEvidence, createEvidence, deleteEvidence } from '../api/evidence';
+import { getTimelineEvents, createTimelineEvent, deleteTimelineEvent } from '../api/timeline';
+import { getRelationships, createRelationship, deleteRelationship } from '../api/relationships';
 import apiClient from '../api/client';
 import MultiSelect from '../components/MultiSelect';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import SortableChapterItem from '../components/SortableChapterItem';
-import { reorderChapters } from '../api/chapters';
 
 const TABS = [
   { key: 'chapters', label: '📝 Boblar' },
@@ -21,6 +20,10 @@ const TABS = [
   { key: 'relationships', label: '🔗 Munosabatlar' },
   { key: 'members', label: '👥 Hamkorlar' },
 ];
+
+function confirmDelete(message) {
+  return window.confirm(message);
+}
 
 function ProjectDetail() {
   const { id } = useParams();
@@ -78,6 +81,14 @@ function ProjectDetail() {
     loadData();
   }
 
+  async function handleDeleteCharacter(e, charId, name) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirmDelete(`"${name}" personajini o'chirmoqchimisiz?`)) return;
+    await deleteCharacter(charId);
+    loadData();
+  }
+
   async function handleAddChapter(e) {
     e.preventDefault();
     if (!chapterTitle.trim()) return;
@@ -86,21 +97,27 @@ function ProjectDetail() {
     loadData();
   }
 
+  async function handleDeleteChapter(chapterId, title) {
+    if (!confirmDelete(`"${title}" bobini o'chirmoqchimisiz? Bu amalni orqaga qaytarib bo'lmaydi.`)) return;
+    await deleteChapter(chapterId);
+    loadData();
+  }
+
   async function handleChapterDragEnd(event) {
-  const { active, over } = event;
-  if (!over || active.id === over.id) return;
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-  const oldIndex = chapters.findIndex((c) => c.id === active.id);
-  const newIndex = chapters.findIndex((c) => c.id === over.id);
-  const reordered = arrayMove(chapters, oldIndex, newIndex);
+    const oldIndex = chapters.findIndex((c) => c.id === active.id);
+    const newIndex = chapters.findIndex((c) => c.id === over.id);
+    const reordered = arrayMove(chapters, oldIndex, newIndex);
 
-  const withNewOrder = reordered.map((c, index) => ({ ...c, order: index + 1 }));
-  setChapters(withNewOrder);
+    const withNewOrder = reordered.map((c, index) => ({ ...c, order: index + 1 }));
+    setChapters(withNewOrder);
 
-  await reorderChapters(
-    withNewOrder.map((c) => ({ id: c.id, order: c.order }))
-  );
-}
+    await reorderChapters(
+      withNewOrder.map((c) => ({ id: c.id, order: c.order }))
+    );
+  }
 
   async function handleInvite(e) {
     e.preventDefault();
@@ -134,6 +151,12 @@ function ProjectDetail() {
     loadData();
   }
 
+  async function handleDeleteEvidence(evId, name) {
+    if (!confirmDelete(`"${name}" dalilini o'chirmoqchimisiz?`)) return;
+    await deleteEvidence(evId);
+    loadData();
+  }
+
   function handleCharacterCheckbox(charId) {
     setEvidenceCharacters((prev) =>
       prev.includes(charId) ? prev.filter((c) => c !== charId) : [...prev, charId]
@@ -154,6 +177,12 @@ function ProjectDetail() {
     loadData();
   }
 
+  async function handleDeleteEvent(eventId, title) {
+    if (!confirmDelete(`"${title}" voqeasini o'chirmoqchimisiz?`)) return;
+    await deleteTimelineEvent(eventId);
+    loadData();
+  }
+
   async function handleAddRelationship(e) {
     e.preventDefault();
     if (!relFrom || !relTo || !relType.trim()) return;
@@ -165,6 +194,12 @@ function ProjectDetail() {
     setRelFrom('');
     setRelTo('');
     setRelType('');
+    loadData();
+  }
+
+  async function handleDeleteRelationship(relId) {
+    if (!confirmDelete('Bu munosabatni o\'chirmoqchimisiz?')) return;
+    await deleteRelationship(relId);
     loadData();
   }
 
@@ -215,15 +250,23 @@ function ProjectDetail() {
                 />
                 <button type="submit">Qo'shish</button>
               </form>
-              <DndContext collisionDetection={closestCenter} onDragEnd={handleChapterDragEnd}>
-  <SortableContext items={chapters.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-    <ul>
-      {chapters.map((ch) => (
-        <SortableChapterItem key={ch.id} chapter={ch} />
-      ))}
-    </ul>
-  </SortableContext>
-</DndContext>
+              {chapters.length === 0 ? (
+                <p className="empty-state">Hali bob yo'q. Birinchisini yarating!</p>
+              ) : (
+                <DndContext collisionDetection={closestCenter} onDragEnd={handleChapterDragEnd}>
+                  <SortableContext items={chapters.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                    <ul>
+                      {chapters.map((ch) => (
+                        <SortableChapterItem
+                          key={ch.id}
+                          chapter={ch}
+                          onDelete={() => handleDeleteChapter(ch.id, ch.title)}
+                        />
+                      ))}
+                    </ul>
+                  </SortableContext>
+                </DndContext>
+              )}
             </section>
           )}
 
@@ -239,97 +282,119 @@ function ProjectDetail() {
                 />
                 <button type="submit">Qo'shish</button>
               </form>
-              <ul>
-                {characters.map((c) => (
-                  <li key={c.id}>
-                    <Link to={`/characters/${c.id}`}>{c.name}</Link>
-                  </li>
-                ))}
-              </ul>
+              {characters.length === 0 ? (
+                <p className="empty-state">Hali personaj yo'q. Birinchisini qo'shing!</p>
+              ) : (
+                <ul>
+                  {characters.map((c) => (
+                    <li key={c.id} className="list-row">
+                      <Link to={`/characters/${c.id}`}>{c.name}</Link>
+                      <button
+                        className="delete-btn"
+                        onClick={(e) => handleDeleteCharacter(e, c.id, c.name)}
+                      >
+                        ✕
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           )}
 
           {activeTab === 'evidence' && (
-  <section>
-    <h3>Dalillar</h3>
+            <section>
+              <h3>Dalillar</h3>
 
-    <form onSubmit={handleAddEvidence} className="stacked-form">
-      <div className="form-group">
-        <label>Dalil nomi</label>
-        <input
-          type="text"
-          placeholder="Masalan: Qizil ro'mol"
-          value={evidenceName}
-          onChange={(e) => setEvidenceName(e.target.value)}
-        />
-      </div>
+              <form onSubmit={handleAddEvidence} className="stacked-form">
+                <div className="form-group">
+                  <label>Dalil nomi</label>
+                  <input
+                    type="text"
+                    placeholder="Masalan: Qizil ro'mol"
+                    value={evidenceName}
+                    onChange={(e) => setEvidenceName(e.target.value)}
+                  />
+                </div>
 
-      <div className="form-group">
-        <label>Tavsifi</label>
-        <textarea
-          rows={3}
-          placeholder="Dalil haqida batafsil"
-          value={evidenceDescription}
-          onChange={(e) => setEvidenceDescription(e.target.value)}
-        />
-      </div>
+                <div className="form-group">
+                  <label>Tavsifi</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Dalil haqida batafsil"
+                    value={evidenceDescription}
+                    onChange={(e) => setEvidenceDescription(e.target.value)}
+                  />
+                </div>
 
-      <div className="form-group">
-        <label>Qayerdan topildi</label>
-        <input
-          type="text"
-          placeholder="Masalan: Yotoqxona javoni"
-          value={evidenceLocation}
-          onChange={(e) => setEvidenceLocation(e.target.value)}
-        />
-      </div>
+                <div className="form-group">
+                  <label>Qayerdan topildi</label>
+                  <input
+                    type="text"
+                    placeholder="Masalan: Yotoqxona javoni"
+                    value={evidenceLocation}
+                    onChange={(e) => setEvidenceLocation(e.target.value)}
+                  />
+                </div>
 
-      <div className="form-group">
-        <label>
-          <input
-            type="checkbox"
-            checked={evidenceIsReal}
-            onChange={(e) => setEvidenceIsReal(e.target.checked)}
-          />
-          {' '}Haqiqiy dalil (belgisiz qoldirilsa — soxta)
-        </label>
-      </div>
+                <div className="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={evidenceIsReal}
+                      onChange={(e) => setEvidenceIsReal(e.target.checked)}
+                    />
+                    {' '}Haqiqiy dalil (belgisiz qoldirilsa — soxta)
+                  </label>
+                </div>
 
-      <div className="form-group">
-        <label>Qaysi personajlarga bog'liq</label>
-        {characters.length === 0 ? (
-          <p className="muted">Avval "Personajlar" bo'limida personaj qo'shing</p>
-        ) : (
-          <MultiSelect
-            options={characters}
-            selected={evidenceCharacters}
-            onChange={setEvidenceCharacters}
-            placeholder="Personajlarni tanlang"
-          />
-        )}
-      </div>
+                <div className="form-group">
+                  <label>Qaysi personajlarga bog'liq</label>
+                  {characters.length === 0 ? (
+                    <p className="muted">Avval "Personajlar" bo'limida personaj qo'shing</p>
+                  ) : (
+                    <MultiSelect
+                      options={characters}
+                      selected={evidenceCharacters}
+                      onChange={setEvidenceCharacters}
+                      placeholder="Personajlarni tanlang"
+                    />
+                  )}
+                </div>
 
-      <button type="submit" className="submit-btn">+ Dalil qo'shish</button>
-    </form>
+                <button type="submit" className="submit-btn">+ Dalil qo'shish</button>
+              </form>
 
-    <div className="item-list">
-      {evidenceList.map((ev) => (
-        <div className="item-card" key={ev.id}>
-          <div className="item-card-header">
-            <strong>{ev.name}</strong>
-            <span className={ev.is_real ? 'badge badge-real' : 'badge badge-fake'}>
-              {ev.is_real ? 'Haqiqiy' : 'Soxta'}
-            </span>
-          </div>
-          {ev.found_location && (
-            <p className="muted">📍 {ev.found_location}</p>
+              {evidenceList.length === 0 ? (
+                <p className="empty-state">Hali dalil yo'q.</p>
+              ) : (
+                <div className="item-list">
+                  {evidenceList.map((ev) => (
+                    <div className="item-card" key={ev.id}>
+                      <div className="item-card-header">
+                        <strong>{ev.name}</strong>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span className={ev.is_real ? 'badge badge-real' : 'badge badge-fake'}>
+                            {ev.is_real ? 'Haqiqiy' : 'Soxta'}
+                          </span>
+                          <button
+                            className="delete-btn"
+                            onClick={() => handleDeleteEvidence(ev.id, ev.name)}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                      {ev.found_location && (
+                        <p className="muted">📍 {ev.found_location}</p>
+                      )}
+                      {ev.description && <p>{ev.description}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
           )}
-          {ev.description && <p>{ev.description}</p>}
-        </div>
-      ))}
-    </div>
-  </section>
-)}
 
           {activeTab === 'timeline' && (
             <section>
@@ -349,13 +414,23 @@ function ProjectDetail() {
                 />
                 <button type="submit">Qo'shish</button>
               </form>
-              <ul>
-                {timelineEvents.map((ev) => (
-                  <li key={ev.id}>
-                    <strong>{ev.event_time}</strong> — {ev.title}
-                  </li>
-                ))}
-              </ul>
+              {timelineEvents.length === 0 ? (
+                <p className="empty-state">Hali voqea yo'q.</p>
+              ) : (
+                <ul>
+                  {timelineEvents.map((ev) => (
+                    <li key={ev.id} className="list-row">
+                      <span><strong>{ev.event_time}</strong> — {ev.title}</span>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDeleteEvent(ev.id, ev.title)}
+                      >
+                        ✕
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           )}
 
@@ -383,13 +458,23 @@ function ProjectDetail() {
                 />
                 <button type="submit">Qo'shish</button>
               </form>
-              <ul>
-                {relationships.map((r) => (
-                  <li key={r.id}>
-                    {r.from_character_name} → {r.to_character_name}: {r.relationship_type}
-                  </li>
-                ))}
-              </ul>
+              {relationships.length === 0 ? (
+                <p className="empty-state">Hali munosabat yo'q.</p>
+              ) : (
+                <ul>
+                  {relationships.map((r) => (
+                    <li key={r.id} className="list-row">
+                      <span>{r.from_character_name} → {r.to_character_name}: {r.relationship_type}</span>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDeleteRelationship(r.id)}
+                      >
+                        ✕
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           )}
 
@@ -406,11 +491,15 @@ function ProjectDetail() {
                 <button type="submit">Taklif qilish</button>
               </form>
               {inviteError && <p style={{ color: 'var(--danger)' }}>{inviteError}</p>}
-              <ul>
-  {members.map((m) => (
-    <li key={m.id}>{m.user_name || m.user_email}</li>
-  ))}
-</ul>
+              {members.length === 0 ? (
+                <p className="empty-state">Hali hamkor yo'q. Sherigingizni email orqali taklif qiling.</p>
+              ) : (
+                <ul>
+                  {members.map((m) => (
+                    <li key={m.id}>{m.user_name || m.user_email}</li>
+                  ))}
+                </ul>
+              )}
             </section>
           )}
         </div>

@@ -19,3 +19,7 @@ export async function updateCharacter(id, data) {
   const response = await apiClient.patch(`/characters/${id}/`, data);
   return response.data;
 }
+
+export async function deleteCharacter(id) {
+  await apiClient.delete(`/characters/${id}/`);
+}

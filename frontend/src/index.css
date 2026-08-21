@@ -778,3 +778,10 @@ button .spinner {
   background: var(--accent-hover);
   text-decoration: none !important;
 }
+
+.list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}

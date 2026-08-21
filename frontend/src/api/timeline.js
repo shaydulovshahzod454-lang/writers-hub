@@ -9,3 +9,7 @@ export async function createTimelineEvent(data) {
   const response = await apiClient.post('/timeline-events/', data);
   return response.data;
 }
+
+export async function deleteTimelineEvent(id) {
+  await apiClient.delete(`/timeline-events/${id}/`);
+}

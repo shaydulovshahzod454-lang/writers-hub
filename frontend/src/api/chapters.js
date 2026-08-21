@@ -28,3 +28,7 @@ export async function checkConsistency(chapterId) {
   const response = await apiClient.post(`/chapters/${chapterId}/check_consistency/`);
   return response.data;
 }
+
+export async function deleteChapter(id) {
+  await apiClient.delete(`/chapters/${id}/`);
+}

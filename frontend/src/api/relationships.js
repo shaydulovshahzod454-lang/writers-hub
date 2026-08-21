@@ -9,3 +9,7 @@ export async function createRelationship(data) {
   const response = await apiClient.post('/relationships/', data);
   return response.data;
 }
+
+export async function deleteRelationship(id) {
+  await apiClient.delete(`/relationships/${id}/`);
+}
