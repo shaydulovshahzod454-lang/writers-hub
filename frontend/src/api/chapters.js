@@ -32,3 +32,15 @@ export async function checkConsistency(chapterId) {
 export async function deleteChapter(id) {
   await apiClient.delete(`/chapters/${id}/`);
 }
+
+export async function getVersions(chapterId) {
+  const response = await apiClient.get(`/chapters/${chapterId}/versions/`);
+  return response.data;
+}
+
+export async function restoreVersion(chapterId, versionId) {
+  const response = await apiClient.post(`/chapters/${chapterId}/restore_version/`, {
+    version_id: versionId,
+  });
+  return response.data;
+}

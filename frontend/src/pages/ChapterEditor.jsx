@@ -1,11 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getChapter, updateChapter, checkConsistency } from '../api/chapters';
+import { getChapter, updateChapter, checkConsistency, getVersions, restoreVersion } from '../api/chapters';
 import { getComments, createComment } from '../api/comments';
 import RichTextEditor from '../components/RichTextEditor';
 import Spinner from '../components/Spinner';
 
 const AUTOSAVE_DELAY_MS = 2500;
+
+function stripHtml(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html || '';
+  return div.textContent || div.innerText || '';
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
 
 function ChapterEditor() {
   const { id } = useParams();
@@ -19,6 +30,9 @@ function ChapterEditor() {
   const [quotedText, setQuotedText] = useState('');
   const [checking, setChecking] = useState(false);
   const [aiResult, setAiResult] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
+  const [versions, setVersions] = useState([]);
+  const [loadingVersions, setLoadingVersions] = useState(false);
 
   const savedContentRef = useRef('');
   const autosaveTimerRef = useRef(null);
@@ -84,12 +98,40 @@ function ChapterEditor() {
   async function handleSave() {
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     setSaving(true);
-    await updateChapter(id, { content });
+    await updateChapter(id, { content, create_version: true });
     savedContentRef.current = content;
     setSaving(false);
     setDirty(false);
     setStatus('Saqlandi ✓');
     setTimeout(() => setStatus(''), 2000);
+    if (showHistory) loadVersions();
+  }
+
+  async function loadVersions() {
+    setLoadingVersions(true);
+    try {
+      const data = await getVersions(id);
+      setVersions(data);
+    } finally {
+      setLoadingVersions(false);
+    }
+  }
+
+  function toggleHistory() {
+    const next = !showHistory;
+    setShowHistory(next);
+    if (next) loadVersions();
+  }
+
+  async function handleRestore(versionId) {
+    if (!window.confirm('Bu versiyani tiklamoqchimisiz? Hozirgi matn ham tarixga saqlanadi, yo\'qolmaydi.')) return;
+    const updated = await restoreVersion(id, versionId);
+    setContent(updated.content || '');
+    savedContentRef.current = updated.content || '';
+    setDirty(false);
+    setStatus('Versiya tiklandi ✓');
+    setTimeout(() => setStatus(''), 2000);
+    loadVersions();
   }
 
   async function handleAddComment(e) {
@@ -120,8 +162,38 @@ function ChapterEditor() {
 
   return (
     <div>
-      <Link to={`/projects/${chapter.project}`}>← Ortga</Link>
-      <h2>{chapter.title}</h2>
+      <div className="page-header">
+        <Link to={`/projects/${chapter.project}`}>← Ortga</Link>
+        <h2>{chapter.title}</h2>
+        <button onClick={toggleHistory} className="edit-toggle-btn">
+          🕒 {showHistory ? 'Tarixni yopish' : 'Tarix'}
+        </button>
+      </div>
+
+      {showHistory && (
+        <div className="item-list" style={{ marginBottom: 20 }}>
+          {loadingVersions ? (
+            <div className="page-loading"><Spinner size={28} /></div>
+          ) : versions.length === 0 ? (
+            <p className="empty-state">Hali versiya tarixi yo'q. "Saqlash" tugmasini bosganingizda, oldingi holat shu yerda saqlanadi.</p>
+          ) : (
+            versions.map((v) => (
+              <div className="item-card" key={v.id}>
+                <div className="item-card-header">
+                  <strong>{formatDate(v.created_at)}</strong>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="muted" style={{ fontSize: 13 }}>{v.created_by_name}</span>
+                    <button className="edit-toggle-btn" onClick={() => handleRestore(v.id)}>
+                      Tiklash
+                    </button>
+                  </div>
+                </div>
+                <p className="muted">{stripHtml(v.content).slice(0, 150)}{stripHtml(v.content).length > 150 ? '...' : ''}</p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
       <RichTextEditor
         content={content}

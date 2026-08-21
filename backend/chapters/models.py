@@ -21,6 +21,26 @@ class Chapter(models.Model):
     def __str__(self):
         return f"{self.order}. {self.title}"
 
+class ChapterVersion(models.Model):
+    chapter = models.ForeignKey(
+        Chapter,
+        on_delete=models.CASCADE,
+        related_name='versions'
+    )
+    content = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Version of {self.chapter} at {self.created_at}"
+
 class Comment(models.Model):
     chapter = models.ForeignKey(
         Chapter,

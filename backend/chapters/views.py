@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_framework import viewsets, permissions
-from .models import Chapter, Comment
-from .serializers import ChapterSerializer, CommentSerializer
+from .models import Chapter, Comment, ChapterVersion
+from .serializers import ChapterSerializer, CommentSerializer, ChapterVersionSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from groq import Groq
@@ -21,6 +21,42 @@ class ChapterViewSet(viewsets.ModelViewSet):
         if project_id:
             queryset = queryset.filter(project_id=project_id)
         return queryset
+
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        create_version = self.request.data.get('create_version')
+        if create_version and instance.content:
+            ChapterVersion.objects.create(
+                chapter=instance,
+                content=instance.content,
+                created_by=self.request.user,
+            )
+        serializer.save()
+
+    @action(detail=True, methods=['get'])
+    def versions(self, request, pk=None):
+        chapter = self.get_object()
+        versions = chapter.versions.all()[:30]
+        return Response(ChapterVersionSerializer(versions, many=True).data)
+
+    @action(detail=True, methods=['post'])
+    def restore_version(self, request, pk=None):
+        chapter = self.get_object()
+        version_id = request.data.get('version_id')
+        try:
+            version = chapter.versions.get(id=version_id)
+        except ChapterVersion.DoesNotExist:
+            return Response({'error': 'Versiya topilmadi'}, status=404)
+
+        if chapter.content:
+            ChapterVersion.objects.create(
+                chapter=chapter,
+                content=chapter.content,
+                created_by=request.user,
+            )
+        chapter.content = version.content
+        chapter.save()
+        return Response(ChapterSerializer(chapter).data)
 
     @action(detail=True, methods=['post'])
     def check_consistency(self, request, pk=None):
