@@ -785,3 +785,8 @@ button .spinner {
   align-items: center;
   gap: 10px;
 }
+
+.save-status {
+  font-size: 13px;
+  color: var(--text-muted);
+}

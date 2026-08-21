@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getChapter, updateChapter, checkConsistency } from '../api/chapters';
 import { getComments, createComment } from '../api/comments';
 import RichTextEditor from '../components/RichTextEditor';
 import Spinner from '../components/Spinner';
+
+const AUTOSAVE_DELAY_MS = 2500;
 
 function ChapterEditor() {
   const { id } = useParams();
@@ -11,30 +13,81 @@ function ChapterEditor() {
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [quotedText, setQuotedText] = useState('');
   const [checking, setChecking] = useState(false);
   const [aiResult, setAiResult] = useState('');
 
+  const savedContentRef = useRef('');
+  const autosaveTimerRef = useRef(null);
+  const isInitialLoadRef = useRef(true);
+
   useEffect(() => {
     loadChapter();
+    return () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    };
   }, [id]);
 
+  useEffect(() => {
+    function handleBeforeUnload(e) {
+      if (dirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [dirty]);
+
   async function loadChapter() {
+    isInitialLoadRef.current = true;
     const [chapterData, commentsData] = await Promise.all([
       getChapter(id),
       getComments(id),
     ]);
     setChapter(chapterData);
     setContent(chapterData.content || '');
+    savedContentRef.current = chapterData.content || '';
     setComments(commentsData);
   }
 
+  const saveContent = useCallback(async (contentToSave) => {
+    if (contentToSave === savedContentRef.current) return;
+    setSaving(true);
+    await updateChapter(id, { content: contentToSave });
+    savedContentRef.current = contentToSave;
+    setSaving(false);
+    setDirty(false);
+    setStatus('Avtomatik saqlandi ✓');
+    setTimeout(() => setStatus(''), 2000);
+  }, [id]);
+
+  function handleContentChange(newContent) {
+    setContent(newContent);
+
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false;
+      return;
+    }
+
+    setDirty(newContent !== savedContentRef.current);
+
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = setTimeout(() => {
+      saveContent(newContent);
+    }, AUTOSAVE_DELAY_MS);
+  }
+
   async function handleSave() {
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     setSaving(true);
     await updateChapter(id, { content });
+    savedContentRef.current = content;
     setSaving(false);
+    setDirty(false);
     setStatus('Saqlandi ✓');
     setTimeout(() => setStatus(''), 2000);
   }
@@ -72,7 +125,7 @@ function ChapterEditor() {
 
       <RichTextEditor
         content={content}
-        onChange={setContent}
+        onChange={handleContentChange}
         onCommentRequest={(text) => setQuotedText(text)}
       />
       <br />
@@ -80,7 +133,11 @@ function ChapterEditor() {
         {saving && <Spinner size={16} />}
         {saving ? 'Saqlanmoqda...' : 'Saqlash'}
       </button>
-      <span> {!saving && status}</span>
+      <span className="save-status">
+        {' '}
+        {!saving && status}
+        {!saving && !status && dirty && 'Saqlanmagan o\'zgarishlar bor...'}
+      </span>
 
       <div className="ai-check-block">
         <button onClick={handleCheckConsistency} disabled={checking} className={checking ? 'btn-loading' : ''}>
