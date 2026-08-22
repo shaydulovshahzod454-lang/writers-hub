@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from groq import Groq
 from django.conf import settings
+from notifications.utils import notify_project
 
 
 class ChapterViewSet(viewsets.ModelViewSet):
@@ -32,6 +33,18 @@ class ChapterViewSet(viewsets.ModelViewSet):
                 created_by=self.request.user,
             )
         serializer.save()
+
+        def perform_create(self, serializer):
+            chapter = serializer.save()
+            actor = self.request.user
+            actor_name = actor.first_name or actor.email
+            notify_project(
+                project=chapter.project,
+                actor=actor,
+                verb='chapter_created',
+                message=f'{actor_name} yangi bob yaratdi: "{chapter.title}"',
+                link=f'/chapters/{chapter.id}',
+            )
 
     @action(detail=True, methods=['get'])
     def versions(self, request, pk=None):
@@ -150,5 +163,15 @@ class CommentViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(chapter_id=chapter_id)
         return queryset
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        def perform_create(self, serializer):
+            comment = serializer.save(author=self.request.user)
+            chapter = comment.chapter
+            actor = self.request.user
+            actor_name = actor.first_name or actor.email
+            notify_project(
+                project=chapter.project,
+                actor=actor,
+                verb='comment',
+                message=f'{actor_name} "{chapter.title}" boliga izoh qoldirdi',
+                link=f'/chapters/{chapter.id}',
+            )

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { logout, isAuthenticated, getUsername } from '../api/auth';
 import logoIcon from '../assets/logo-icon.png';
+import NotificationBell from './NotificationBell';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ function Navbar() {
       </div>
       {authed ? (
         <div className="nav-actions">
+          <NotificationBell />
           <span className="nav-username">👤 {getUsername()}</span>
           <Link to="/dashboard">Loyihalarim</Link>
           <button onClick={handleLogout}>Chiqish</button>

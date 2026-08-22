@@ -8,6 +8,8 @@ from django.http import HttpResponse
 from docx import Document
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from notifications.utils import notify_project
+from notifications.models import Notification
 
 User = get_user_model()
 
@@ -65,10 +67,26 @@ class ProjectMemberViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(project_id=project_id)
         return queryset
 
-        def perform_create(self, serializer):
-            email = serializer.validated_data.pop('email')
-            try:
-                user = User.objects.get(email__iexact=email)
-            except User.DoesNotExist:
-                raise ValidationError({'email': 'Bu email bilan foydalanuvchi topilmadi'})
-            serializer.save(user=user)
+    def perform_create(self, serializer):
+        email = serializer.validated_data.pop('email')
+        try:
+            new_user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            raise ValidationError({'email': 'Bu email bilan foydalanuvchi topilmadi'})
+        member = serializer.save(user=new_user)
+        actor = self.request.user
+        actor_name = actor.first_name or actor.email
+        notify_project(
+            project=member.project,
+            actor=new_user,
+            verb='member_joined',
+            message=f'{actor_name} yangi hamkorni loyihaga qo\'shdi',
+            link=f'/projects/{member.project.id}',
+        )
+        Notification.objects.create(
+            recipient=new_user,
+            project=member.project,
+            verb='member_joined',
+            message=f'{actor_name} sizni "{member.project.title}" loyihasiga qo\'shdi',
+            link=f'/projects/{member.project.id}',
+        )

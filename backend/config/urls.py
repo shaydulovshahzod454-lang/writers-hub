@@ -13,4 +13,5 @@ urlpatterns = [
     path('api/', include('evidence.urls')),
     path('api/', include('timeline.urls')),
     path('api/', include('accounts.urls')),
+    path('api/', include('notifications.urls')),
 ]
