@@ -966,3 +966,57 @@ button .spinner {
   color: var(--text-muted);
   font-family: 'Segoe UI', sans-serif;
 }
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.editor-layout:has(.context-panel) {
+  grid-template-columns: 1fr 320px;
+}
+
+.context-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: sticky;
+  top: 20px;
+}
+
+.context-panel h3 {
+  margin-top: 0;
+}
+
+.context-section {
+  margin-top: 18px;
+}
+
+.context-label {
+  display: block;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.context-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.context-card strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.context-card p {
+  margin: 2px 0;
+}

@@ -12,6 +12,21 @@ class Chapter(models.Model):
     title = models.CharField(max_length=255)
     order = models.PositiveIntegerField(default=0)
     content = models.TextField(blank=True)
+    related_characters = models.ManyToManyField(
+        'characters.Character',
+        related_name='chapters',
+        blank=True
+    )
+    related_evidence = models.ManyToManyField(
+        'evidence.Evidence',
+        related_name='chapters',
+        blank=True
+    )
+    related_events = models.ManyToManyField(
+        'timeline.TimelineEvent',
+        related_name='chapters',
+        blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
