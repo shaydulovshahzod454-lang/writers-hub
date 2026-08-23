@@ -1,3 +1,4 @@
+import json
 from django.db.models import Q
 from rest_framework import viewsets, permissions
 from .models import Chapter, Comment, ChapterVersion
@@ -122,23 +123,78 @@ DALILLAR:
 BOB MATNI:
 {chapter_content}
 
-Vazifang: bob matnini yuqoridagi ma'lumot bazasi bilan solishtir. Agar ziddiyat topsang (masalan personaj tavsifiga mos kelmaydigan xatti-harakat, timeline bilan mos kelmaydigan vaqt, dalil bilan zid keladigan tafsilot), har birini aniq ko'rsat va qanday tuzatish mumkinligini qisqacha taklif qil. Agar ziddiyat topmasang, shuni aniq ayt. Javobni o'zbek tilida, qisqa va aniq ro'yxat shaklida ber."""
+Vazifang: bob matnini yuqoridagi ma'lumot bazasi bilan solishtir va potensial ziddiyatlarni top (masalan personaj tavsifiga mos kelmaydigan xatti-harakat, timeline bilan mos kelmaydigan vaqt, dalil bilan zid keladigan tafsilot).
+
+Javobni FAQAT quyidagi JSON massiv formatida qaytar, boshqa hech qanday matn, izoh yoki markdown belgisi (masalan ```) qo'shma:
+
+[
+  {{
+    "issue": "Ziddiyatning qisqa nomi",
+    "chapter_source": "Bob matnidan aynan qaysi jumla yoki qism (qisqa iqtibos)",
+    "project_source": "Qaysi personaj/dalil/timeline ma'lumoti bilan zid (aniq nom bilan)",
+    "explanation": "Nima uchun bu potensial muammo ekanini tushuntir",
+    "suggested_action": "Nima qilish mumkinligi bo'yicha aniq taklif",
+    "confidence": "High" | "Medium" | "Low"
+  }}
+]
+
+Agar hech qanday ziddiyat topmasang, bo'sh massiv qaytar: []
+Hammasi o'zbek tilida bo'lsin, faqat "confidence" qiymati High/Medium/Low bo'lsin."""
 
         try:
             client = Groq(api_key=settings.GROQ_API_KEY)
             completion = client.chat.completions.create(
                 model="openai/gpt-oss-120b",
-                max_tokens=1000,
+                max_tokens=1500,
                 messages=[{"role": "user", "content": prompt}]
             )
-            result = completion.choices[0].message.content
+            raw_result = completion.choices[0].message.content
         except Exception:
             return Response(
                 {'error': 'AI xizmati bilan bog\'lanishda xatolik yuz berdi. Birozdan so\'ng qaytadan urinib ko\'ring.'},
                 status=502
             )
 
-        return Response({'result': result})
+        issues = self._parse_ai_issues(raw_result)
+        if issues is not None:
+            return Response({'issues': issues})
+
+        return Response({'result': raw_result})
+
+    def _parse_ai_issues(self, raw_text):
+        text = raw_text.strip()
+        if text.startswith('```'):
+            text = text.strip('`')
+            if text.lower().startswith('json'):
+                text = text[4:]
+            text = text.strip()
+
+        start = text.find('[')
+        end = text.rfind(']')
+        if start == -1 or end == -1 or end < start:
+            return None
+
+        try:
+            parsed = json.loads(text[start:end + 1])
+        except (json.JSONDecodeError, ValueError):
+            return None
+
+        if not isinstance(parsed, list):
+            return None
+
+        valid_issues = []
+        for item in parsed:
+            if not isinstance(item, dict):
+                continue
+            valid_issues.append({
+                'issue': str(item.get('issue', ''))[:300],
+                'chapter_source': str(item.get('chapter_source', ''))[:300],
+                'project_source': str(item.get('project_source', ''))[:300],
+                'explanation': str(item.get('explanation', ''))[:600],
+                'suggested_action': str(item.get('suggested_action', ''))[:400],
+                'confidence': item.get('confidence') if item.get('confidence') in ('High', 'Medium', 'Low') else 'Medium',
+            })
+        return valid_issues
 
     @action(detail=False, methods=['post'])
     def reorder(self, request):

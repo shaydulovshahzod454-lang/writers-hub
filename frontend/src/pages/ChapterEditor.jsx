@@ -34,6 +34,7 @@ function ChapterEditor() {
   const [quotedText, setQuotedText] = useState('');
   const [checking, setChecking] = useState(false);
   const [aiResult, setAiResult] = useState('');
+  const [aiIssues, setAiIssues] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   const [versions, setVersions] = useState([]);
   const [loadingVersions, setLoadingVersions] = useState(false);
@@ -175,12 +176,17 @@ function ChapterEditor() {
     setComments(updated);
   }
 
-  async function handleCheckConsistency() {
+    async function handleCheckConsistency() {
     setChecking(true);
     setAiResult('');
+    setAiIssues(null);
     try {
       const data = await checkConsistency(id);
-      setAiResult(data.result);
+      if (data.issues) {
+        setAiIssues(data.issues);
+      } else {
+        setAiResult(data.result);
+      }
     } catch (err) {
       const backendError = err.response?.data?.error;
       setAiResult(backendError || 'Xatolik yuz berdi. Qaytadan urinib ko\'ring.');
@@ -251,11 +257,45 @@ function ChapterEditor() {
             {!saving && !status && dirty && 'Saqlanmagan o\'zgarishlar bor...'}
           </span>
 
-          <div className="ai-check-block">
+                    <div className="ai-check-block">
             <button onClick={handleCheckConsistency} disabled={checking} className={checking ? 'btn-loading' : ''}>
               {checking && <Spinner size={16} />}
               {checking ? 'Tekshirilmoqda...' : '🤖 AI orqali tekshirish'}
             </button>
+
+            {aiIssues !== null && (
+              aiIssues.length === 0 ? (
+                <div className="ai-result">
+                  <p>✅ Hech qanday ziddiyat topilmadi.</p>
+                </div>
+              ) : (
+                <div className="ai-issues-list">
+                  {aiIssues.map((issue, index) => (
+                    <div className="ai-issue-card" key={index}>
+                      <div className="ai-issue-header">
+                        <strong>{issue.issue}</strong>
+                        <span className={`badge confidence-${issue.confidence.toLowerCase()}`}>
+                          {issue.confidence === 'High' ? 'Yuqori' : issue.confidence === 'Low' ? 'Past' : 'O\'rta'} ishonch
+                        </span>
+                      </div>
+                      {issue.chapter_source && (
+                        <p className="ai-issue-row"><strong>Bobdan:</strong> "{issue.chapter_source}"</p>
+                      )}
+                      {issue.project_source && (
+                        <p className="ai-issue-row"><strong>Zid keladi:</strong> {issue.project_source}</p>
+                      )}
+                      {issue.explanation && (
+                        <p className="ai-issue-row">{issue.explanation}</p>
+                      )}
+                      {issue.suggested_action && (
+                        <p className="ai-issue-suggestion">💡 {issue.suggested_action}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+
             {aiResult && (
               <div className="ai-result">
                 <h4>Natija</h4>
