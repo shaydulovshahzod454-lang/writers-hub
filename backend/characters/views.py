@@ -2,6 +2,7 @@ from django.db.models import Q
 from rest_framework import viewsets, permissions
 from .models import Character, Relationship
 from .serializers import CharacterSerializer, RelationshipSerializer
+from notifications.utils import notify_project
 
 
 class CharacterViewSet(viewsets.ModelViewSet):
@@ -17,6 +18,19 @@ class CharacterViewSet(viewsets.ModelViewSet):
         if project_id:
             queryset = queryset.filter(project_id=project_id)
         return queryset
+
+    def perform_create(self, serializer):
+        character = serializer.save()
+        actor = self.request.user
+        actor_name = actor.first_name or actor.email
+        notify_project(
+            project=character.project,
+            actor=actor,
+            verb='character_created',
+            message=f'{actor_name} yangi personaj qo\'shdi: "{character.name}"',
+            link=f'/characters/{character.id}',
+        )
+
 
 class RelationshipViewSet(viewsets.ModelViewSet):
     serializer_class = RelationshipSerializer
