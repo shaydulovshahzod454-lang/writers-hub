@@ -1071,3 +1071,29 @@ button .spinner {
   background: #dcecdc;
   color: #2e6b2e;
 }
+
+.graph-wrapper {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.relationship-graph {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.graph-node {
+  cursor: pointer;
+}
+
+.graph-node circle {
+  transition: opacity 0.15s ease;
+}
+
+.graph-node:hover circle {
+  opacity: 0.8;
+}

@@ -11,6 +11,7 @@ import MultiSelect from '../components/MultiSelect';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import SortableChapterItem from '../components/SortableChapterItem';
+import RelationshipGraph from '../components/RelationshipGraph';
 
 const TABS = [
   { key: 'chapters', label: '📝 Boblar' },
@@ -510,9 +511,14 @@ function ProjectDetail() {
             </section>
           )}
 
-          {activeTab === 'relationships' && (
+                    {activeTab === 'relationships' && (
             <section>
               <h3>Munosabatlar</h3>
+
+              {relationships.length > 0 && (
+                <RelationshipGraph characters={characters} relationships={relationships} />
+              )}
+
               <form onSubmit={handleAddRelationship}>
                 <select value={relFrom} onChange={(e) => setRelFrom(e.target.value)}>
                   <option value="">Kimdan</option>
