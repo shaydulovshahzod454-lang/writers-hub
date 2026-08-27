@@ -12,6 +12,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import SortableChapterItem from '../components/SortableChapterItem';
 import RelationshipGraph from '../components/RelationshipGraph';
+import DetectiveBoard from '../components/DetectiveBoard';
 
 const TABS = [
   { key: 'chapters', label: '📝 Boblar' },
@@ -19,6 +20,7 @@ const TABS = [
   { key: 'evidence', label: '🔍 Dalillar' },
   { key: 'timeline', label: '🕐 Timeline' },
   { key: 'relationships', label: '🔗 Munosabatlar' },
+  { key: 'board', label: '🕵️ Taxta' },
   { key: 'members', label: '👥 Hamkorlar' },
 ];
 
@@ -557,6 +559,18 @@ function ProjectDetail() {
                   ))}
                 </ul>
               )}
+            </section>
+          )}
+
+                    {activeTab === 'board' && (
+            <section>
+              <h3>Detektiv taxtasi</h3>
+              <DetectiveBoard
+                projectId={id}
+                characters={characters}
+                evidenceList={evidenceList}
+                timelineEvents={timelineEvents}
+              />
             </section>
           )}
 

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'evidence',
     'timeline',
     'notifications',
+    'board',
 ]
 
 MIDDLEWARE = [
