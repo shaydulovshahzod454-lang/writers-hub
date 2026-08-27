@@ -1097,3 +1097,20 @@ button .spinner {
 .graph-node:hover circle {
   opacity: 0.8;
 }
+
+.graph-edge {
+  cursor: help;
+  transition: opacity 0.15s ease;
+}
+
+.graph-edge:hover {
+  opacity: 1;
+  stroke-width: 2.5;
+}
+
+.graph-hint {
+  text-align: center;
+  font-size: 12px;
+  padding: 6px 0 10px;
+  margin: 0;
+}
