@@ -34,9 +34,22 @@ class ChapterViewSet(viewsets.ModelViewSet):
                 created_by=self.request.user,
             )
         serializer.save()
+        self._sanitize_related(instance)
+
+    def _sanitize_related(self, chapter):
+        chapter.related_characters.set(
+            chapter.related_characters.filter(project=chapter.project)
+        )
+        chapter.related_evidence.set(
+            chapter.related_evidence.filter(project=chapter.project)
+        )
+        chapter.related_events.set(
+            chapter.related_events.filter(project=chapter.project)
+        )
 
     def perform_create(self, serializer):
         chapter = serializer.save()
+        self._sanitize_related(chapter)
         actor = self.request.user
         actor_name = actor.first_name or actor.email
         notify_project(

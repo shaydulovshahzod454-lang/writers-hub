@@ -10,8 +10,63 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from notifications.utils import notify_project
 from notifications.models import Notification
+from html.parser import HTMLParser
 
 User = get_user_model()
+
+
+class _DocxHtmlParser(HTMLParser):
+    """Converts simple TipTap-generated HTML into paragraphs/runs on a python-docx Document."""
+
+    def __init__(self, document):
+        super().__init__()
+        self.document = document
+        self.paragraph = None
+        self.bold = False
+        self.italic = False
+        self.list_type = None
+
+    def _ensure_paragraph(self, style=None):
+        self.paragraph = self.document.add_paragraph(style=style)
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'p':
+            self._ensure_paragraph()
+        elif tag in ('h1', 'h2', 'h3'):
+            level = {'h1': 1, 'h2': 2, 'h3': 3}[tag]
+            self.paragraph = self.document.add_heading('', level=level)
+        elif tag in ('strong', 'b'):
+            self.bold = True
+        elif tag in ('em', 'i'):
+            self.italic = True
+        elif tag == 'li':
+            self._ensure_paragraph(style='List Bullet')
+        elif tag == 'br':
+            if self.paragraph is not None:
+                self.paragraph.add_run().add_break()
+
+    def handle_endtag(self, tag):
+        if tag in ('strong', 'b'):
+            self.bold = False
+        elif tag in ('em', 'i'):
+            self.italic = False
+
+    def handle_data(self, data):
+        if not data.strip():
+            return
+        if self.paragraph is None:
+            self._ensure_paragraph()
+        run = self.paragraph.add_run(data)
+        run.bold = self.bold
+        run.italic = self.italic
+
+
+def add_html_to_docx(document, html_content):
+    if not html_content or not html_content.strip():
+        document.add_paragraph('')
+        return
+    parser = _DocxHtmlParser(document)
+    parser.feed(html_content)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -43,7 +98,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
         for chapter in chapters:
             document.add_heading(chapter.title, level=1)
-            document.add_paragraph(chapter.content)
+            add_html_to_docx(document, chapter.content)
 
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
